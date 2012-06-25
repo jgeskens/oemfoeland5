@@ -1,0 +1,400 @@
+// !$*UTF8*$!
+{
+	1704B41A096199C800EE6A28 /* OEMFGame.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {794, 854}}";
+			sepNavSelRange = "{698, 0}";
+			sepNavVisRect = "{{0, 2}, {737, 586}}";
+		};
+	};
+	1704B41B096199C800EE6A28 /* OEMFGame.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1146, 9618}}";
+			sepNavSelRange = "{15976, 0}";
+			sepNavVisRange = "{15400, 1380}";
+			sepNavVisRect = "{{0, 2056}, {750, 586}}";
+		};
+	};
+	1704B43609619F6900EE6A28 /* OEMFLevel.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {737, 1064}}";
+			sepNavSelRange = "{1630, 0}";
+			sepNavVisRect = "{{0, 462}, {737, 586}}";
+			sepNavWindowFrame = "{{61, 141}, {750, 558}}";
+		};
+	};
+	1704B43709619F6900EE6A28 /* OEMFLevel.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1146, 4340}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{6004, 1029}";
+			sepNavVisRect = "{{0, 2690}, {737, 586}}";
+		};
+	};
+	1704B4920961BBC100EE6A28 /* OEMFLevelEdit.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {970, 715}}";
+			sepNavSelRange = "{1176, 0}";
+			sepNavVisRange = "{0, 1039}";
+			sepNavVisRect = "{{0, 0}, {737, 586}}";
+			sepNavWindowFrame = "{{15, 201}, {856, 672}}";
+		};
+	};
+	1704B4930961BBC100EE6A28 /* OEMFLevelEdit.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {896, 7406}}";
+			sepNavSelRange = "{8448, 0}";
+			sepNavVisRect = "{{0, 3494}, {737, 586}}";
+			sepNavWindowFrame = "{{38, 162}, {750, 558}}";
+		};
+	};
+	17145B990B32D99800E475E9 /* OEMFGObjectList.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1146, 694}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 348}";
+			sepNavVisRect = "{{0, 0}, {686, 586}}";
+		};
+	};
+	17145B9A0B32D99800E475E9 /* OEMFGObjectList.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1146, 694}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 178}";
+			sepNavVisRect = "{{0, 0}, {686, 586}}";
+		};
+	};
+	172C81810B2C520E006845B5 /* Oemfoeland 5 (Upgraded) */ = {
+		activeExec = 0;
+		executables = (
+			9D415D750C59452200E20CFB /* Oemfoeland 5 (Upgraded) */,
+		);
+	};
+	172C81C00B2C520F006845B5 /* Info-Oemfoeland_5__Upgraded_.plist */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {686, 586}}";
+			sepNavSelRange = "{317, 0}";
+			sepNavVisRect = "{{0, 0}, {686, 586}}";
+		};
+	};
+	174D86810958C6FA008187C1 /* OEMFImage.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {737, 672}}";
+			sepNavSelRange = "{1059, 0}";
+			sepNavVisRect = "{{0, 70}, {737, 586}}";
+		};
+	};
+	174D86820958C6FA008187C1 /* OEMFImage.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1146, 1974}}";
+			sepNavSelRange = "{999, 0}";
+			sepNavVisRange = "{21, 934}";
+			sepNavVisRect = "{{0, 723}, {737, 586}}";
+		};
+	};
+	17C20DB509605E72002CB406 /* OEMFStorage.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1146, 1540}}";
+			sepNavSelRange = "{1863, 0}";
+			sepNavVisRange = "{1134, 1079}";
+			sepNavVisRect = "{{0, 954}, {750, 586}}";
+		};
+	};
+	17C20DB609605E72002CB406 /* OEMFStorage.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1146, 2408}}";
+			sepNavSelRange = "{1079, 0}";
+			sepNavVisRange = "{3450, 1029}";
+			sepNavVisRect = "{{0, 1711}, {711, 429}}";
+			sepNavWindowFrame = "{{107, 92}, {750, 558}}";
+		};
+	};
+	17C210450960CB21002CB406 /* OEMFMain.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {983, 2702}}";
+			sepNavSelRange = "{2650, 0}";
+			sepNavVisRect = "{{0, 1376}, {983, 231}}";
+		};
+	};
+	17C3BF750968BC9D001B4E58 /* OEMFGObject.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1146, 798}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 1167}";
+			sepNavVisRect = "{{0, 56}, {686, 586}}";
+		};
+	};
+	17C3BF760968BC9D001B4E58 /* OEMFGObject.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1146, 694}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 170}";
+			sepNavVisRect = "{{0, 0}, {686, 586}}";
+		};
+	};
+	17CC3F53095AFA5C00AD50E8 /* OEMFString.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1146, 694}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 486}";
+		};
+	};
+	17CC3F54095AFA5C00AD50E8 /* OEMFString.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1146, 1274}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{203, 999}";
+		};
+	};
+	17CC40DE095CD43F00AD50E8 /* OEMFEnvironment.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {986, 840}}";
+			sepNavSelRange = "{1199, 0}";
+			sepNavVisRect = "{{0, 246}, {750, 586}}";
+			sepNavWindowFrame = "{{15, 183}, {750, 558}}";
+		};
+	};
+	17CC40DF095CD43F00AD50E8 /* OEMFEnvironment.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1146, 4690}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{3367, 1214}";
+			sepNavVisRect = "{{0, 1375}, {711, 429}}";
+			sepNavWindowFrame = "{{35, 173}, {750, 558}}";
+		};
+	};
+	17F18E9E095DBEC500DB7319 /* OEMFFontFactory.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1004, 714}}";
+			sepNavSelRange = "{1668, 0}";
+			sepNavVisRect = "{{0, 64}, {686, 586}}";
+		};
+	};
+	17F18E9F095DBEC500DB7319 /* OEMFFontFactory.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1088, 3360}}";
+			sepNavSelRange = "{957, 0}";
+			sepNavVisRect = "{{0, 112}, {737, 586}}";
+			sepNavWindowFrame = "{{38, 162}, {750, 558}}";
+		};
+	};
+	17F18F56095E27BA00DB7319 /* OEMFIntro.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {794, 586}}";
+			sepNavSelRange = "{497, 0}";
+			sepNavVisRect = "{{0, 0}, {750, 586}}";
+		};
+	};
+	17F18F57095E27BA00DB7319 /* OEMFIntro.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1146, 1386}}";
+			sepNavSelRange = "{1367, 0}";
+			sepNavVisRange = "{0, 1484}";
+			sepNavVisRect = "{{0, 456}, {750, 586}}";
+			sepNavWindowFrame = "{{125, 65}, {750, 558}}";
+		};
+	};
+	29B97313FDCFA39411CA2CEA /* Project object */ = {
+		activeArchitecturePreference = i386;
+		activeBuildConfigurationName = Deployment;
+		activeExecutable = 9D415D750C59452200E20CFB /* Oemfoeland 5 (Upgraded) */;
+		activeSDKPreference = macosx10.5;
+		activeTarget = 172C81810B2C520E006845B5 /* Oemfoeland 5 (Upgraded) */;
+		addToTargets = (
+			172C81810B2C520E006845B5 /* Oemfoeland 5 (Upgraded) */,
+		);
+		breakpoints = (
+		);
+		codeSenseManager = 9D415D870C59452B00E20CFB /* Code sense */;
+		executables = (
+			9D415D750C59452200E20CFB /* Oemfoeland 5 (Upgraded) */,
+			9D415D760C59452200E20CFB /* Oemfoeland 5 */,
+		);
+		perUserDictionary = {
+			PBXConfiguration.PBXFileTableDataSource3.PBXErrorsWarningsDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXErrorsWarningsDataSource_LocationID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					300,
+					200,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXErrorsWarningsDataSource_TypeID,
+					PBXErrorsWarningsDataSource_MessageID,
+					PBXErrorsWarningsDataSource_LocationID,
+				);
+			};
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					364,
+					20,
+					48,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXConfiguration.PBXFileTableDataSource3.XCSCMDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					20,
+					515,
+					20,
+					48.1626,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_SCM_ColumnID,
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 362338958;
+			PBXWorkspaceStateSaveDate = 362338958;
+		};
+		perUserProjectItems = {
+			9DDE48911598DAE60003159A /* XCBuildMessageTextBookmark */ = 9DDE48911598DAE60003159A /* XCBuildMessageTextBookmark */;
+			9DDE48A31598DBE70003159A /* PBXTextBookmark */ = 9DDE48A31598DBE70003159A /* PBXTextBookmark */;
+		};
+		sourceControlManager = 9D415D860C59452B00E20CFB /* Source Control */;
+		userBuildSettings = {
+		};
+	};
+	29B97326FDCFA39411CA2CEA /* Oemfoeland 5 */ = {
+		activeExec = 0;
+		executables = (
+			9D415D760C59452200E20CFB /* Oemfoeland 5 */,
+		);
+	};
+	9D415D750C59452200E20CFB /* Oemfoeland 5 (Upgraded) */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		dataTipCustomDataFormattersEnabled = 1;
+		dataTipShowTypeColumn = 1;
+		dataTipSortType = 0;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		dylibVariantSuffix = "";
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = "Oemfoeland 5 (Upgraded)";
+		savedGlobals = {
+		};
+		showTypeColumn = 0;
+		sourceDirectories = (
+		);
+		variableFormatDictionary = {
+		};
+	};
+	9D415D760C59452200E20CFB /* Oemfoeland 5 */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		dataTipCustomDataFormattersEnabled = 1;
+		dataTipShowTypeColumn = 1;
+		dataTipSortType = 0;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = "Oemfoeland 5";
+		showTypeColumn = 0;
+		sourceDirectories = (
+		);
+	};
+	9D415D860C59452B00E20CFB /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 1;
+		scmConfiguration = {
+			SubversionToolPath = /opt/local/bin/svn;
+			repositoryNamesForRoots = {
+				"" = "";
+			};
+		};
+		scmType = scm.subversion;
+	};
+	9D415D870C59452B00E20CFB /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	9DAA48E90C8226380057ECAC /* resources.def */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {737, 882}}";
+			sepNavSelRange = "{1164, 0}";
+			sepNavVisRect = "{{0, 0}, {737, 586}}";
+		};
+	};
+	9DDE48911598DAE60003159A /* XCBuildMessageTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "Extra qualification 'OEMFLevelEdit::' on member 'chooseBackground'";
+		fRef = 1704B4920961BBC100EE6A28 /* OEMFLevelEdit.h */;
+		fallbackIsa = XCBuildMessageTextBookmark;
+		rLen = 1;
+		rLoc = 28;
+		rType = 1;
+	};
+	9DDE48A31598DBE70003159A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1704B4920961BBC100EE6A28 /* OEMFLevelEdit.h */;
+		name = "OEMFLevelEdit.h: 50";
+		rLen = 0;
+		rLoc = 1176;
+		rType = 0;
+		vrLen = 1039;
+		vrLoc = 0;
+	};
+	F5A47A9F01A0483001D3D55B /* main.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1266, 1050}}";
+			sepNavSelRange = "{555, 0}";
+			sepNavVisRange = "{134, 1016}";
+			sepNavVisRect = "{{0, 774}, {983, 231}}";
+		};
+	};
+}

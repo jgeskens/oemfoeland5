@@ -1,0 +1,11 @@
+Copyright notice
+----------------
+
+Oemfoeland 5 is copyright (C) Jef Geskens 2005-2007.
+The background of the title screen is copyright (C) Steve Gilissen 2005-2007.
+You may redistribute or modify Oemfoeland 5 under the conditions of the GNU GPL version 2.
+The music you hear at the main menu and the game itself is Boiling from the artist Belief Systems (album EPROMs).
+This song is distributed under a Creative Commons license (Attribution, Non-Commercial, Share alike).
+If you like it, please consider buying it at Magnatune! http://www.magnatune.com/artists/albums/belief-eproms/
+
+
