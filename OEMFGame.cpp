@@ -21,7 +21,7 @@ OEMFGame :: OEMFGame(SDL_Surface * screen, char * execPath, unsigned int screenW
 	m_levelNo = lastEditedLevel;
 	m_lives = 3;
 	m_frameDuration = 20;
-	m_delayTime = 10;
+	m_delayTime = 20;
 	m_level = 0x0;
 	m_score = 0;
 	m_done = 0;
