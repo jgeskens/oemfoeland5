@@ -48,6 +48,7 @@ protected:
 	unsigned int m_mouseY;
 	unsigned int m_originX;
 	unsigned int m_originY;
+	bool m_showTypes;
 	bool m_drawRect;
 };
 

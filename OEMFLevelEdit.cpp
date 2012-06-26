@@ -33,19 +33,19 @@ OEMFLevelEdit :: OEMFLevelEdit(SDL_Surface * screen, char * execPath, unsigned i
 	m_typeListCount = TYPECOUNT;
 	m_typeList = new string[m_typeListCount];
 	k = 0;
-	m_typeList[k] = "Free, non-blocking"; k++;
-	m_typeList[k] = "Wall, blocking"; k++;
-	m_typeList[k] = "Platform, block downwards"; k++;
-	m_typeList[k] = "Movable block"; k++;
-	m_typeList[k] = "Coin 100"; k++;
-	m_typeList[k] = "End Level"; k++;
-	m_typeList[k] = "Start Position (1x)"; k++;
-	m_typeList[k] = "Unstable"; k++;
-	m_typeList[k] = "Deadly"; k++;
-	m_typeList[k] = "Left Force  (<--)"; k++;
-	m_typeList[k] = "Right Force (-->)"; k++;
-	m_typeList[k] = "Left Conveyor Belt (<--)"; k++;
-	m_typeList[k] = "Right Conveyor Belt (-->)"; k++;
+	m_typeList[k] = " 0 Free, non-blocking"; k++;
+	m_typeList[k] = " 1 Wall, blocking"; k++;
+	m_typeList[k] = " 2 Platform, block downwards"; k++;
+	m_typeList[k] = " 3 Movable block"; k++;
+	m_typeList[k] = " 4 Coin 100"; k++;
+	m_typeList[k] = " 5 End Level"; k++;
+	m_typeList[k] = " 6 Start Position (1x)"; k++;
+	m_typeList[k] = " 7 Unstable"; k++;
+	m_typeList[k] = " 8 Deadly"; k++;
+	m_typeList[k] = " 9 Left Force  (<--)"; k++;
+	m_typeList[k] = "10 Right Force (-->)"; k++;
+	m_typeList[k] = "11 Left Conveyor Belt (<--)"; k++;
+	m_typeList[k] = "12 Right Conveyor Belt (-->)"; k++;
 	m_currentType = 0;
 	m_beginX = 0;
 	m_beginY = 0;
@@ -56,6 +56,7 @@ OEMFLevelEdit :: OEMFLevelEdit(SDL_Surface * screen, char * execPath, unsigned i
 	m_originX = 0;
 	m_originY = 0;
 	m_drawRect = false;
+	m_showTypes = false;
 }
 
 OEMFLevelEdit :: ~OEMFLevelEdit(void)
@@ -171,7 +172,7 @@ void OEMFLevelEdit :: drawInterface(unsigned int left, unsigned int top, unsigne
 	clearWithColor(0x000000, false);
 	
 	// top bar
-	font->blitText(this, ("Level Edit '" + m_level->name() + "' Change: [N]ame [I]ndex [R] size"), 0xFFFF00, 0, 0, 640, false);
+	font->blitText(this, ("Level Edit '" + m_level->name() + "' Change: [N]ame [I]ndex [R]esize"), 0xFFFF00, 0, 0, 640, false);
 	font->blitText(this, "[B]ackground [S]elect icon [T]ype [E]yedrop [F]ill [L]oad [W]rite [ESC] exit", 0x007FFF, 0, 16, 640, false);
 	
 	// background
@@ -179,6 +180,7 @@ void OEMFLevelEdit :: drawInterface(unsigned int left, unsigned int top, unsigne
 	
 	// level
 	unsigned int x, y, ypos;
+	char typestring[4];
 	for (y = m_beginY; y - m_beginY < 13 && y < m_level->height(); y++)
 	{
 		ypos = y * m_level->width();
@@ -187,8 +189,10 @@ void OEMFLevelEdit :: drawInterface(unsigned int left, unsigned int top, unsigne
 			tile_t curtile = m_level->tiles()[x + ypos];
 			
 			if (curtile.bg < IMAGECOUNT)
+			{
 				blitImage(images[curtile.bg], (x - m_beginX) * 32, (y - m_beginY) * 32 + 32);
-			
+				
+			}
 			if (curtile.fg < IMAGECOUNT)
 			{
 				if (m_background)
@@ -198,6 +202,11 @@ void OEMFLevelEdit :: drawInterface(unsigned int left, unsigned int top, unsigne
 				{
 					SDL_SetAlpha(images[curtile.fg]->getSurface(), SDL_RLEACCEL, 255);
 					SDL_SetColorKey(images[curtile.fg]->getSurface(), SDL_RLEACCEL | SDL_SRCCOLORKEY, 0x0);
+				}
+				if (m_showTypes && curtile.type > 0)
+				{
+					sprintf(typestring, "%d", curtile.type);
+					font->blitText(this, typestring, 0xFFFFFF, (x - m_beginX) * 32, (y - m_beginY) * 32 + 32, 32, false);
 				}
 			}
 		}
@@ -235,6 +244,12 @@ void OEMFLevelEdit :: drawInterface(unsigned int left, unsigned int top, unsigne
 		// tile type
 		font->blitText(this, m_typeList[m_currentType], 0xFFFF00, 32+16*8,m_screenHeight-32,m_screenWidth-(32+16*8), false);
 		font->blitText(this, m_typeList[m_level->getTileType(m_posX, m_posY)],0xFF0000,32+16*8,m_screenHeight-16,m_screenWidth-(32+16*8), false);
+		
+		// show types
+		if (m_showTypes)
+			font->blitText(this, "[U] hide types", 0xFFFF00, m_screenWidth-192, m_screenHeight-16, 128, false);
+		else
+			font->blitText(this, "[U] show types", 0xFFFF00, m_screenWidth-192, m_screenHeight-16, 128, false);
 	}
 	
 	blitImage(images[IMG_CURSOR], m_mouseX, m_mouseY);
@@ -439,6 +454,10 @@ void OEMFLevelEdit :: run(void)
 					else if (event.key.keysym.sym == SDLK_b) // background
 					{
 						m_background = !m_background;
+					}
+					else if (event.key.keysym.sym == SDLK_u) // show types
+					{
+						m_showTypes = !m_showTypes;
 					}
 					else if (event.key.keysym.sym == SDLK_t) // select type
 					{
