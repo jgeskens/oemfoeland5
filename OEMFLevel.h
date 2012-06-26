@@ -28,8 +28,8 @@ class OEMFLevel
 {
 public:
 	// constructors, destructor
-	OEMFLevel(char * name, unsigned char width, unsigned char height);
-	OEMFLevel(char * filename);
+	OEMFLevel(const char * name, unsigned char width, unsigned char height);
+	OEMFLevel(const char * filename);
 	OEMFLevel(OEMFLevel * level);
 	~OEMFLevel(void);
 	

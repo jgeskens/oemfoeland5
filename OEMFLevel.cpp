@@ -17,7 +17,7 @@
 #define _HAS_ITERATOR_DEBUGGING 0
 #define _SECURE_SCL 0
 
-OEMFLevel :: OEMFLevel(char * name, unsigned char width, unsigned char height)
+OEMFLevel :: OEMFLevel(const char * name, unsigned char width, unsigned char height)
 {
 	m_width = width;
 	m_height = height;
@@ -36,7 +36,7 @@ OEMFLevel :: OEMFLevel(char * name, unsigned char width, unsigned char height)
 	raster = NULL;
 }
 
-OEMFLevel :: OEMFLevel(char * filename)
+OEMFLevel :: OEMFLevel(const char * filename)
 {	
 	if (!filename)
 	{
