@@ -97,7 +97,7 @@ void OEMFGame :: initialize()
 		fonts[FNT_AMIGA]->blitCenterText(this, string("\"") + m_level->name() + "\"", 0xFFFF00, 128 + 32, m_screenWidth);
 		fonts[FNT_AMIGA]->blitCenterText(this, string("Go Go Go!"), 0xFF0000, 128 + 64, m_screenWidth);
 		updateScreen();
-		SDL_Delay(4000);
+		SDL_Delay(3000);
 	}
 	else
 	{
@@ -106,10 +106,14 @@ void OEMFGame :: initialize()
 		blitImage(images[IMG_ENDSCREEN], 0, 0);
 		blitImage(images[IMG_OEMFOE], 32, 360);
 		fonts[FNT_AMIGA]->blitText(this,
-			"Congratulations! You reached the end of the game! You can now do something else with your life, "
-			"but if you are too addicted, you can always use the Level Editor and create more worlds. \n"
+//			"----/----|----/----|----/----|----/----|"
+			"Congratulations! You reached the end of\n"
+			"the game! You can now do something else\n"
+			"with your life, but if you are too\n"
+			"addicted, you can always use the Level\n"
+			"Editor and create more worlds.\n"
 			"Press any key to continue...",
-			0xFFFF00, 80, 360, 320, false);
+			0xFFFF00, 80, 320, 320, false);
 		updateScreen();
 		waitForKey();
 		fadeOut();
@@ -660,7 +664,9 @@ void OEMFGame :: run()
 				case SDL_KEYDOWN:
 					if (event.key.keysym.sym == SDLK_ESCAPE)
 					{	
-						m_done = 1;
+						string options[2] = {string("No"), string("Yes")};
+						if (chooseList(0, "Are you sure you want to end the game?", options, 2) == 1)
+							m_done = 1;
 					}
 					else if (event.key.keysym.sym == SDLK_q)
 					{
