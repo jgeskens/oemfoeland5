@@ -679,10 +679,12 @@ void OEMFGame :: run()
 					else if (event.key.keysym.sym == SDLK_e)
 					{
 						m_delayTime--;
+						printf("m_delayTime = %d\n", m_delayTime);
 					}
 					else if (event.key.keysym.sym == SDLK_r)
 					{
 						m_delayTime++;
+						printf("m_delayTime = %d\n", m_delayTime);
 					}
 					else if (event.key.keysym.sym == SDLK_p)
 					{
