@@ -25,6 +25,9 @@ OEMFGame :: OEMFGame(SDL_Surface * screen, char * execPath, unsigned int screenW
 	m_level = 0x0;
 	m_score = 0;
 	m_done = 0;
+	m_requestFlagEnd = false;
+	m_requestFlagDie = false;
+	
 	initialize();
 }
 
@@ -585,15 +588,14 @@ void OEMFGame :: handleCollision(OEMFGObject * causedObj, OEMFGObject * victimOb
 		if (victimObj->flag() == 0)
 		{
 			victimObj->setFlag(1); // void this object
-			endLevel();
-			initialize();
+			m_requestFlagEnd = true;
 		}
 	}
 	else if (victimObj->type() == TYPE_DEADLY)
 	{
 		if (causedObj == m_player)
 		{
-			die();
+			m_requestFlagDie = true;
 		}
 		else
 		{
@@ -631,6 +633,20 @@ void OEMFGame :: run()
 		}
 		handleInput();
 		updatePhysics();
+		
+		// handle flags
+		if (m_requestFlagDie)
+		{
+			m_requestFlagDie = false;
+			die();
+		}
+		if (m_requestFlagEnd)
+		{
+			m_requestFlagEnd = false;
+			endLevel();
+			initialize();
+		}
+		
 		Uint32 sym;
 		/* Check for events */
 		while (SDL_PollEvent(&event)) 

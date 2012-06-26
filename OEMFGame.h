@@ -44,6 +44,8 @@ protected:
 	int m_beginX;
 	int m_beginY;
 	int m_done;
+	bool m_requestFlagEnd;
+	bool m_requestFlagDie;
 	
 	// timing
 	Uint32 m_frameDuration;

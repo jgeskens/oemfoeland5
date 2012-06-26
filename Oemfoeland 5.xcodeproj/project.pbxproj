@@ -779,7 +779,7 @@
 		172C81BD0B2C520F006845B5 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = ppc;
+				ARCHS = "$(ONLY_ACTIVE_ARCH_PRE_XCODE_3_1)";
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = "\"/Library/Frameworks\"";
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -791,12 +791,14 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(LIBRARY_SEARCH_PATHS_QUOTED_1)";
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"/Users/jefgeskens/Programmeren/SDL/Oemfoeland 5\"";
+				ONLY_ACTIVE_ARCH_PRE_XCODE_3_1 = "$(NATIVE_ARCH)";
 				OTHER_CPLUSPLUSFLAGS = "-D__DEBUG__";
 				OTHER_LDFLAGS = (
 					"-framework",
 					SDL,
 				);
 				PRODUCT_NAME = "Oemfoeland 5";
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -943,6 +945,7 @@
 					i386,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				OTHER_CFLAGS = "-D__DEBUG__";
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
 			name = Development;
