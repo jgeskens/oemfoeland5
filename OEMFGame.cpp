@@ -97,7 +97,9 @@ void OEMFGame :: initialize()
 		fonts[FNT_AMIGA]->blitCenterText(this, string("\"") + m_level->name() + "\"", 0xFFFF00, 128 + 32, m_screenWidth);
 		fonts[FNT_AMIGA]->blitCenterText(this, string("Go Go Go!"), 0xFF0000, 128 + 64, m_screenWidth);
 		updateScreen();
+#ifndef __DEBUG__
 		SDL_Delay(3000);
+#endif
 	}
 	else
 	{
@@ -611,6 +613,11 @@ void OEMFGame :: handleCollision(OEMFGObject * causedObj, OEMFGObject * victimOb
 	{
 		die(); // painful when a rock falls on you ;-)
 	}
+}
+
+void OEMFGame :: setPlayerPosition(int x, int y)
+{
+	m_level->moveObject(m_player, x, y);
 }
 
 void OEMFGame :: run()

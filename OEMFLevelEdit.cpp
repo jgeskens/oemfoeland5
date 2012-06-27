@@ -13,6 +13,7 @@
 
 #include "OEMFLevelEdit.h"
 #include "OEMFStorage.h"
+#include "OEMFGame.h"
 
 OEMFLevelEdit :: OEMFLevelEdit(SDL_Surface * screen, char * execPath, unsigned int screenWidth, unsigned int screenHeight, unsigned int screenBpp)
 	: OEMFEnvironment(screen, execPath, screenWidth, screenHeight, screenBpp)
@@ -252,6 +253,9 @@ void OEMFLevelEdit :: drawInterface(unsigned int left, unsigned int top, unsigne
 			font->blitText(this, "[U] show types", 0xFFFF00, m_screenWidth-192, m_screenHeight-16, 128, false);
 	}
 	
+	// play level
+	font->blitText(this, "[P]lay level", 0x00CC00, m_screenWidth-192, m_screenHeight-32, 128, false);
+	
 	blitImage(images[IMG_CURSOR], m_mouseX, m_mouseY);
 	
 	updateScreen();
@@ -305,7 +309,9 @@ void OEMFLevelEdit :: importLevel()
 		fileList[i] = buffer;
 	}
 	
-	int result = chooseList(levelNum, "Load Level", fileList, levelNum);
+	int levelno;
+	sscanf(m_filename.c_str(), PREPATH "level%d.lvl", &levelno);
+	int result = chooseList(levelno-1, "Load Level", fileList, levelNum);
 	if (result != levelNum)
 	{
 		sprintf(buffer, PREPATH "level%d.lvl", result+1);
@@ -497,6 +503,20 @@ void OEMFLevelEdit :: run(void)
 					else if (event.key.keysym.sym == SDLK_y)
 					{
 						chooseBackground();
+					}
+					else if (event.key.keysym.sym == SDLK_p)
+					{
+						// Save level first
+						m_level->writeToFile(m_filename.c_str());
+						int levelno;
+						sscanf(m_filename.c_str(), PREPATH "level%d.lvl", &levelno);
+						lastEditedLevel = levelno;
+						
+						// Start a test game
+						OEMFGame * game = new OEMFGame(m_screen, m_execPath, m_screenWidth, m_screenHeight, m_screenBpp);
+						game->setPlayerPosition(m_posX * 32, m_posY * 32);
+						game->run();
+						delete game;
 					}
 					else if (event.key.keysym.sym == SDLK_PAGEUP)
 					{

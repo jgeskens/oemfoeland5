@@ -26,6 +26,7 @@ public:
 	~OEMFGame();
 
 	virtual void run();
+	void setPlayerPosition(int x, int y);
 protected:
 	void refresh();
 	void refreshCentered();
