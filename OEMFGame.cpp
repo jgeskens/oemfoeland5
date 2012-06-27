@@ -198,15 +198,28 @@ void OEMFGame :: refreshCentered()
 	int beginPosY = -(m_player->posY() % 32);
 	int totalBeginX = beginX * 32 - beginPosX - 16 + 32;
 	int totalBeginY = beginY * 32 - beginPosY - 16 + 32;
+	
+	// Calculate bottom left boundary of level scrolling
 	int maxScrollX = (m_level->width() - 1) * 32 - (m_screenWidth - 32);
 	int maxScrollY = (m_level->height() - 1) * 32 - (m_screenHeight - 64);
-	m_screenScrollX = totalBeginX;
-	m_screenScrollY = totalBeginY;
+	//m_screenScrollX = totalBeginX;
+	//m_screenScrollY = totalBeginY;
 	
+	// Make sure the player is in the center rectangle of the screen...
+	int playerScreenX = m_player->posX() - m_screenScrollX;
+	int playerScreenY = m_player->posY() - m_screenScrollY;
+	if (playerScreenX < 160) m_screenScrollX = m_player->posX() - 160;
+	if (playerScreenY < 112) m_screenScrollY = m_player->posY() - 112;
+	if (playerScreenX > 448) m_screenScrollX = m_player->posX() - 448;
+	if (playerScreenY > 304) m_screenScrollY = m_player->posY() - 304;
+	
+	// ... but keep the boundaries of level within the screen.
 	if (m_screenScrollX < 0) m_screenScrollX = 0;
 	if (m_screenScrollY < 0) m_screenScrollY = 0;
 	if (m_screenScrollX > maxScrollX) m_screenScrollX = maxScrollX;
 	if (m_screenScrollY > maxScrollY) m_screenScrollY = maxScrollY;
+	
+	// Calculate object coordinates of top left block on the screen
 	beginX = m_screenScrollX / 32 - 1;
 	beginY = m_screenScrollY / 32 - 1;
 
