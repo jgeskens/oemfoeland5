@@ -38,7 +38,7 @@ bool musicEnabled = true;
 bool fullscreenMode = true;
 #endif
 
-void loadFilesIntoDataMemory(char * defFile)
+void loadFilesIntoDataMemory(const char * defFile)
 {
 	FILE * def = fopen(defFile, "rb");
 	if (def == 0)

@@ -22,7 +22,7 @@ class OEMFImage
 public:
 	OEMFImage(void); // default constructor
 	OEMFImage(const OEMFImage * image); // pointer copy constructor
-	OEMFImage(char * filename, bool hasAlhpha = false); // tga load constructor
+	OEMFImage(const char * filename, bool hasAlhpha = false); // tga load constructor
 	~OEMFImage(void); // destructor
 	
 	// setters

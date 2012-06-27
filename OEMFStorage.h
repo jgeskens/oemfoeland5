@@ -91,7 +91,7 @@ using namespace std;
 #define TYPE_LEFTCONV 11
 #define TYPE_RIGHTCONV 12
 
-void loadFilesIntoDataMemory(char * defFile);
+void loadFilesIntoDataMemory(const char * defFile);
 void releaseDataMemory();
 void animateImages();
 void setLoadProgressCB(void (*func)(int current, int total, void * object), void * object);

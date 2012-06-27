@@ -45,7 +45,7 @@ OEMFImage :: OEMFImage(const OEMFImage * image)
 }
 
 
-OEMFImage :: OEMFImage(char * filename, bool hasAlpha)
+OEMFImage :: OEMFImage(const char * filename, bool hasAlpha)
 {
 	// load image
 	m_width = 0;
