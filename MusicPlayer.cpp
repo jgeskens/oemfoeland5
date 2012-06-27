@@ -36,11 +36,13 @@ MusicPlayer :: ~MusicPlayer(void)
 
 void MusicPlayer :: playSound(Mix_Chunk * sample)
 {
+#ifndef __DEBUG__
 #ifndef WINCE
 	// play sample on first free unreserved channel
 	// play it exactly once through
 	// Mix_Chunk *sample; //previously loaded
 	Mix_PlayChannel(-1, sample, 0);
+#endif
 #endif
 }
 
