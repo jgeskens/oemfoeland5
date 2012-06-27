@@ -44,6 +44,8 @@ protected:
 	OEMFLevel * m_level;
 	int m_beginX;
 	int m_beginY;
+	int m_screenScrollX;
+	int m_screenScrollY;
 	int m_done;
 	bool m_requestFlagEnd;
 	bool m_requestFlagDie;

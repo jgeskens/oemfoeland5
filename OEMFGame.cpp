@@ -27,7 +27,9 @@ OEMFGame :: OEMFGame(SDL_Surface * screen, char * execPath, unsigned int screenW
 	m_done = 0;
 	m_requestFlagEnd = false;
 	m_requestFlagDie = false;
-	
+	m_screenScrollX = 0;
+	m_screenScrollY = 0;
+
 	initialize();
 }
 
@@ -196,6 +198,21 @@ void OEMFGame :: refreshCentered()
 	int beginPosY = -(m_player->posY() % 32);
 	int totalBeginX = beginX * 32 - beginPosX - 16 + 32;
 	int totalBeginY = beginY * 32 - beginPosY - 16 + 32;
+	int maxScrollX = (m_level->width() - 1) * 32 - (m_screenWidth - 32);
+	int maxScrollY = (m_level->height() - 1) * 32 - (m_screenHeight - 64);
+	m_screenScrollX = totalBeginX;
+	m_screenScrollY = totalBeginY;
+	
+	if (m_screenScrollX < 0) m_screenScrollX = 0;
+	if (m_screenScrollY < 0) m_screenScrollY = 0;
+	if (m_screenScrollX > maxScrollX) m_screenScrollX = maxScrollX;
+	if (m_screenScrollY > maxScrollY) m_screenScrollY = maxScrollY;
+	beginX = m_screenScrollX / 32 - 1;
+	beginY = m_screenScrollY / 32 - 1;
+
+	totalBeginX = m_screenScrollX;
+	totalBeginY = m_screenScrollY;
+
 	tile_t * ltiles = m_level->tiles();
 	
 	// swap all images of animations
@@ -347,9 +364,12 @@ void OEMFGame :: refreshScoreBoard()
 
 	sprintf(stats, "              Lives:    x%2d", m_lives);
 	fonts[FNT_AMIGA]->blitText(this, stats, 0xFF7700, 12, m_screenHeight-24, m_screenWidth-12, false);
-
-	//sprintf(stats, "                            Level: %3d                          (FD:DT %d:%d)", m_levelNo, m_frameDuration, m_delayTime);
+	
+#ifdef __DEBUG__
+	sprintf(stats, "                            Level: %3d       (Scroll %d:%d)", m_levelNo, m_screenScrollX, m_screenScrollY);
+#else
 	sprintf(stats, "                            Level: %3d                          ", m_levelNo);
+#endif
 	fonts[FNT_AMIGA]->blitText(this, stats, 0x3399FF, 12, m_screenHeight-24, m_screenWidth-12, false);
 
 	blitImage(images[IMG_OEMFOEMINI], 180, m_screenHeight - 24);
