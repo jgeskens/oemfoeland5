@@ -355,6 +355,7 @@ void OEMFLevelEdit :: run(void)
 						else if (event.motion.state & SDL_BUTTON(3))
 							goto LABEL_EYEDROPEVENT;
 					}
+
 					break;
 				case SDL_MOUSEBUTTONDOWN:
 					if (event.button.button == SDL_BUTTON_LEFT)

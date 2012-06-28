@@ -108,7 +108,7 @@ void OEMFGame :: initialize()
 		// game has ended!
 		m_done = 1;
 		blitImage(images[IMG_ENDSCREEN], 0, 0);
-		blitImage(images[IMG_OEMFOE], 32, 360);
+		blitImage(images[IMG_OEMFOE], 32, 320);
 		fonts[FNT_AMIGA]->blitText(this,
 //			"----/----|----/----|----/----|----/----|"
 			"Congratulations! You reached the end of\n"
