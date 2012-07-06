@@ -47,6 +47,11 @@ image bomb3.png 0 3
 image bomb4.png 0 3
 image bomb3.png 0 3
 image bomb2.png 0 3
+# 40
+image elevator1.png 1 4
+image elevator2.png 0 4
+image elevator3.png 0 4
+image elevator4.png 0 4
 # 0
 font font.png 1 32 127 8 16 96
 font menufont.png 0 32 91 32 32 10

@@ -422,6 +422,7 @@ void OEMFGame :: updatePhysics()
 	int x, y;
 	deque<OEMFGObject *>::iterator it;
 	bool needMove = false;
+	unsigned char t;
 	for (it = m_physicsEnabled.begin(); it != m_physicsEnabled.end(); it++)
 	{
 		OEMFGObject * obj = *it;
@@ -435,22 +436,38 @@ void OEMFGame :: updatePhysics()
 
 		// calculate conveyors and forces
 		deque<OEMFGObject *> objectsBelow = m_level->probePosition(obj->posX(), obj->posY() + 1);
-		bool forceFound = false;
+		bool forceFoundX = false;
+		bool forceFoundY = false;
 		OEMFGObject * belowObject = 0;
-		for (deque<OEMFGObject *>::iterator belowIt = objectsBelow.begin(); !forceFound && belowIt != objectsBelow.end(); belowIt++)
+		for (deque<OEMFGObject *>::iterator belowIt = objectsBelow.begin(); belowIt != objectsBelow.end(); belowIt++)
 		{
 			belowObject = *belowIt;
-			if (belowObject->type() == TYPE_LEFTCONV || belowObject->type() == TYPE_RIGHTCONV
-				|| belowObject->type() == TYPE_LEFTFORCE || belowObject->type() == TYPE_RIGHTFORCE)
+			t = belowObject->type();
+			if ((t == TYPE_LEFTCONV 
+				 || t == TYPE_RIGHTCONV
+				 || t == TYPE_LEFTFORCE 
+				 || t == TYPE_RIGHTFORCE)
+				&& !forceFoundX)
 			{
-				forceFound = true;
-				if (belowObject->type() == TYPE_LEFTCONV || belowObject->type() == TYPE_LEFTFORCE)
+				forceFoundX = true;
+				if (t == TYPE_LEFTCONV 
+					|| t == TYPE_LEFTFORCE)
 				{
 					obj->m_vx += -2.0f;
 				}
-				else if (belowObject->type() == TYPE_RIGHTCONV || belowObject->type() == TYPE_RIGHTFORCE)
+				else if (t == TYPE_RIGHTCONV 
+						 || t == TYPE_RIGHTFORCE)
 				{
 					obj->m_vx += 2.0f;
+				}
+			}
+			if (t == TYPE_UPFORCE && !forceFoundY)
+			{
+				forceFoundY = true;
+				if (!m_keyDown[SDLK_DOWN] || obj != m_player)
+				{
+					obj->m_vy = -2.0f;
+					//obj->m_vy -= 2.0f;
 				}
 			}
 		}
@@ -644,7 +661,8 @@ void OEMFGame :: handleCollision(OEMFGObject * causedObj, OEMFGObject * victimOb
 	}
 	else if (victimObj == m_player && causedObj->type() == TYPE_MOVABLE && dy > 0)
 	{
-		die(); // painful when a rock falls on you ;-)
+		m_requestFlagDie = true;
+		// painful when a rock falls on you ;-)
 	}
 }
 

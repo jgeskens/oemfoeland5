@@ -75,7 +75,7 @@ using namespace std;
 #define SND_DRAG 6
 #define SND_OHNO 7
 
-#define TYPECOUNT 13
+#define TYPECOUNT 14
 
 #define TYPE_FREE 0
 #define TYPE_WALL 1
@@ -90,6 +90,7 @@ using namespace std;
 #define TYPE_RIGHTFORCE 10
 #define TYPE_LEFTCONV 11
 #define TYPE_RIGHTCONV 12
+#define TYPE_UPFORCE 13
 
 void loadFilesIntoDataMemory(const char * defFile);
 void releaseDataMemory();

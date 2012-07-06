@@ -47,6 +47,7 @@ OEMFLevelEdit :: OEMFLevelEdit(SDL_Surface * screen, char * execPath, unsigned i
 	m_typeList[k] = "10 Right Force (-->)"; k++;
 	m_typeList[k] = "11 Left Conveyor Belt (<--)"; k++;
 	m_typeList[k] = "12 Right Conveyor Belt (-->)"; k++;
+	m_typeList[k] = "13 Up force (^)"; k++;
 	m_currentType = 0;
 	m_beginX = 0;
 	m_beginY = 0;
