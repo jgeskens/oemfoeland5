@@ -24,6 +24,7 @@ public:
 	~OEMFLevelEdit(void);
 	
 	virtual void run(void);
+	virtual void one_iter(void);
 protected:
 	void drawInterface(unsigned int left, unsigned int top, unsigned int width, unsigned int height);
 	void chooseBackground();
@@ -50,6 +51,9 @@ protected:
 	unsigned int m_originY;
 	bool m_showTypes;
 	bool m_drawRect;
+
+	unsigned int timepassed;
+	int done;
 };
 
 #endif

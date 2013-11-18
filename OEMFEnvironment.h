@@ -46,6 +46,7 @@ public:
 	void waitForKey();
 	unsigned int chooseList(unsigned int index, string title, string * items, unsigned int itemCount);
 	virtual void run(void);
+	virtual void one_iter(void);
 protected:
 	unsigned int m_screenWidth;
 	unsigned int m_screenHeight;
@@ -54,6 +55,10 @@ protected:
 	Uint32 * m_fb;
 	Uint32 m_pitch;
 	char * m_execPath;
+};
+
+extern "C" {
+	extern OEMFEnvironment * oemf_env_instance;
 };
 
 #endif

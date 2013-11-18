@@ -23,9 +23,15 @@ public:
 	
 	void drawIntro(void);
 	virtual void run(void);
+	virtual void one_iter(void);
+	int done;
+	unsigned int menuIndex;
+	unsigned int frames;
+	string songfile;
 protected:
 	string * m_menuOptions;
 	unsigned int m_menuCount;
 };
 
 #endif
+

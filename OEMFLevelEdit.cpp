@@ -15,6 +15,8 @@
 #include "OEMFStorage.h"
 #include "OEMFGame.h"
 
+ #include "emscripten.h"
+
 OEMFLevelEdit :: OEMFLevelEdit(SDL_Surface * screen, char * execPath, unsigned int screenWidth, unsigned int screenHeight, unsigned int screenBpp)
 	: OEMFEnvironment(screen, execPath, screenWidth, screenHeight, screenBpp)
 {
@@ -95,7 +97,7 @@ unsigned int OEMFLevelEdit :: chooseTile(unsigned int index)
 	while (!done)
 	{
 		// calculate beginindex (for scrolling)
-		while ((int) listIndex - (int) beginIndex < 0 && beginIndex >= 0)
+		while ((int) listIndex - (int) beginIndex < 0)
 		{
 			beginIndex--;
 		}
@@ -299,7 +301,7 @@ void OEMFLevelEdit :: importLevel()
 		sprintf(buffer, PREPATH "level%d.lvl", levelNum);
 		if (fh != NULL) 
 			fclose(fh);
-	} while (fh = fopen(buffer, "r"));
+	} while ((fh = fopen(buffer, "r")));
 	if (fh != NULL) 
 		fclose(fh);
 	levelNum--;
@@ -323,249 +325,258 @@ void OEMFLevelEdit :: importLevel()
 	delete [] fileList;
 }
 
-void OEMFLevelEdit :: run(void)
+void OEMFLevelEdit :: one_iter(void)
 {
-	unsigned int timepassed;
 	OEMFFontFactory * font = fonts[FNT_AMIGA];
 	SDL_Event event;
-	int done = 0;
+	timepassed = SDL_GetTicks();
+		
+	drawInterface(0, 0, m_screenWidth, m_screenHeight);
+
+	/* Check for events */
+	while ( SDL_PollEvent(&event) ) 
+	{
+		switch (event.type) 
+		{
+			case SDL_MOUSEMOTION:
+				m_mouseX = event.motion.x;
+				m_mouseY = event.motion.y;
+				if (m_mouseY >= 32 && m_mouseY < m_screenHeight-32)
+				{
+					m_posX = (m_mouseX / 32) + m_beginX;
+					m_posY = ((m_mouseY - 32) / 32) + m_beginY;
+					m_posX = (m_posX + (unsigned int) m_level->width()) % (unsigned int) m_level->width();
+					m_posY = (m_posY + (unsigned int) m_level->height()) % (unsigned int) m_level->height();
+					if (event.motion.state & SDL_BUTTON(1))
+						goto LABEL_RETURNEVENT;
+					else if (event.motion.state & SDL_BUTTON(3))
+						goto LABEL_EYEDROPEVENT;
+				}
+
+				break;
+			case SDL_MOUSEBUTTONDOWN:
+				if (event.button.button == SDL_BUTTON_LEFT)
+					goto LABEL_RETURNEVENT;
+				else if (event.button.button == SDL_BUTTON_RIGHT)
+					goto LABEL_EYEDROPEVENT;
+				break;
+			case SDL_KEYDOWN:
+				if (event.key.keysym.sym == SDLK_ESCAPE)
+				{	
+					done = 1;
+				}
+				if (event.key.keysym.sym == SDLK_LEFT)
+				{	
+					m_posX = (m_posX - 1 + (unsigned int) m_level->width()) % (unsigned int) m_level->width();
+				}
+				if (event.key.keysym.sym == SDLK_RIGHT)
+				{	
+					m_posX = (m_posX + 1) % (unsigned int) m_level->width();
+				}
+				if (event.key.keysym.sym == SDLK_UP)
+				{	
+					m_posY = (m_posY - 1 + (unsigned int) m_level->height()) % (unsigned int) m_level->height();
+				}
+				if (event.key.keysym.sym == SDLK_DOWN)
+				{	
+					m_posY = (m_posY + 1) % (unsigned int) m_level->height();
+				}
+				else if (event.key.keysym.sym == SDLK_RETURN)
+				{
+					; LABEL_RETURNEVENT: ;
+					if (!m_drawRect)
+					{
+						if (m_background)
+							m_level->tiles()[m_posX + m_posY * m_level->width()].bg = m_currentImage;
+						else
+						{
+							m_level->tiles()[m_posX + m_posY * m_level->width()].fg = m_currentImage;
+							m_level->tiles()[m_posX + m_posY * m_level->width()].type = m_currentType;
+						}
+					}
+					else
+					{
+						for (unsigned int rX = m_originX; rX <= m_posX; ++rX)
+							for (unsigned int rY = m_originY; rY <= m_posY; ++rY)
+							{
+								if (m_background)
+									m_level->tiles()[rX + rY * m_level->width()].bg = m_currentImage;
+								else
+								{
+									m_level->tiles()[rX + rY * m_level->width()].fg = m_currentImage;
+									m_level->tiles()[rX + rY * m_level->width()].type = m_currentType;
+								}
+							}
+						m_drawRect = false;
+					}
+				}
+				else if (event.key.keysym.sym == SDLK_f)
+				{
+					if (event.key.keysym.mod == KMOD_LALT
+						|| event.key.keysym.mod == KMOD_RALT)
+					{
+						// fill whole level
+						for (unsigned int rX = 0; rX < m_level->width(); ++rX)
+							for (unsigned int rY = 0; rY < m_level->height(); ++rY)
+							{
+								if (m_background)
+									m_level->tiles()[rX + rY * m_level->width()].bg = m_currentImage;
+								else
+								{
+									m_level->tiles()[rX + rY * m_level->width()].fg = m_currentImage;
+									m_level->tiles()[rX + rY * m_level->width()].type = m_currentType;
+								}
+							}
+					}
+					else if (!m_drawRect)
+					{
+						m_originX = m_posX;
+						m_originY = m_posY;
+						m_drawRect = true;
+					}
+					else
+					{
+						m_drawRect = false;
+					}
+				}
+				else if (event.key.keysym.sym == SDLK_w) // write
+				{
+					m_level->writeToFile(m_filename.c_str());
+					chooseList(0,"Written to '" + m_filename + "'.", NULL, 0);
+					int levelno;
+					sscanf(m_filename.c_str(), PREPATH "level%d.lvl", &levelno);
+					lastEditedLevel = levelno;
+				}
+				else if (event.key.keysym.sym == SDLK_l) // import
+				{
+					importLevel();
+				}
+				else if (event.key.keysym.sym == SDLK_s) // select icon
+				{
+					m_currentImage = chooseTile(m_currentImage);
+				}
+				else if (event.key.keysym.sym == SDLK_b) // background
+				{
+					m_background = !m_background;
+				}
+				else if (event.key.keysym.sym == SDLK_u) // show types
+				{
+					m_showTypes = !m_showTypes;
+				}
+				else if (event.key.keysym.sym == SDLK_t) // select type
+				{
+					// TODO: better message system
+					if (m_background)
+						chooseList(0,"You must be in Foreground Mode!", NULL, 0);
+					else
+						m_currentType = chooseList(m_currentType, "Choose a tile Type:", m_typeList, m_typeListCount);
+				}
+				else if (event.key.keysym.sym == SDLK_e) // eyedrop
+				{
+					; LABEL_EYEDROPEVENT: ;
+					if (m_background)
+						m_currentImage = m_level->getTileBG(m_posX, m_posY);
+					else
+					{
+						m_currentImage = m_level->getTileFG(m_posX, m_posY);
+						m_currentType = m_level->getTileType(m_posX, m_posY);
+					}
+				}
+				else if (event.key.keysym.sym == SDLK_r) // resize
+				{
+					resizeDialog();
+				}
+				else if (event.key.keysym.sym == SDLK_n) // rename
+				{
+					m_level->setName(font->inputText(this, m_level->name(), 12*font->charWidth(), 0, 32));
+				}
+				else if (event.key.keysym.sym == SDLK_i) // change level number
+				{
+					char newfilename[256];
+					int levelno;
+					sscanf(m_filename.c_str(), PREPATH "level%d.lvl", &levelno);
+					sprintf(newfilename, PREPATH "level%d.lvl", font->inputNumber(this, levelno, 0, 0, 3));
+					m_filename = newfilename;
+				}
+				else if (event.key.keysym.sym == SDLK_y)
+				{
+					chooseBackground();
+				}
+				else if (event.key.keysym.sym == SDLK_p)
+				{
+					// Save level first
+					m_level->writeToFile(m_filename.c_str());
+					int levelno;
+					sscanf(m_filename.c_str(), PREPATH "level%d.lvl", &levelno);
+					lastEditedLevel = levelno;
+					
+					// Start a test game
+					OEMFGame * game = new OEMFGame(m_screen, m_execPath, m_screenWidth, m_screenHeight, m_screenBpp);
+					game->setPlayerPosition(m_posX * 32, m_posY * 32);
+					game->run();
+					delete game;
+				}
+				else if (event.key.keysym.sym == SDLK_PAGEUP)
+				{
+					if ((int) m_posY - ((int) m_screenHeight-64) / 32 >= 0)
+					{
+						m_posY = m_posY - (m_screenHeight-64) / 32;
+						m_beginY = m_beginY - (m_screenHeight-64) / 32;
+					}
+				}
+				else if (event.key.keysym.sym == SDLK_PAGEDOWN)
+				{
+					if (m_posY + (m_screenHeight-64) / 32 < m_level->height())
+					{
+						m_posY = m_posY + (m_screenHeight-64) / 32;
+						m_beginY = m_beginY + (m_screenHeight-64) / 32;
+					}
+				}
+				else if (event.key.keysym.sym == SDLK_HOME)
+				{
+					if ((int) m_posX - (int) m_screenWidth / 32 >= 0)
+					{
+						m_posX = m_posX - m_screenWidth / 32;
+						m_beginX = m_beginX - m_screenWidth / 32;
+					}
+				}
+				else if (event.key.keysym.sym == SDLK_END)
+				{
+					if (m_posX + m_screenWidth / 32 < m_level->width())
+					{
+						m_posX = m_posX + m_screenWidth / 32;
+						m_beginX = m_beginX + m_screenWidth / 32;
+					}
+				}
+				break;
+			case SDL_QUIT:
+				exit(0); // TODO
+				done = 1;
+				break;
+			default:
+				break;
+		}
+	}
+}
+
+
+void OEMFLevelEdit :: run(void)
+{
+	done = 0;
 	
 	SDL_WarpMouse(16, 48);
 	
-	while ( !done) 
-	{
-		timepassed = SDL_GetTicks();
-		
-		drawInterface(0, 0, m_screenWidth, m_screenHeight);
-		/* Check for events */
-		while ( SDL_PollEvent(&event) ) 
+	#ifdef EMSCRIPTEN
+		oemf_env_instance = this;
+	#else
+		while (!done) 
 		{
-			switch (event.type) 
-			{
-				case SDL_MOUSEMOTION:
-					m_mouseX = event.motion.x;
-					m_mouseY = event.motion.y;
-					if (m_mouseY >= 32 && m_mouseY < m_screenHeight-32)
-					{
-						m_posX = (m_mouseX / 32) + m_beginX;
-						m_posY = ((m_mouseY - 32) / 32) + m_beginY;
-						m_posX = (m_posX + (unsigned int) m_level->width()) % (unsigned int) m_level->width();
-						m_posY = (m_posY + (unsigned int) m_level->height()) % (unsigned int) m_level->height();
-						if (event.motion.state & SDL_BUTTON(1))
-							goto LABEL_RETURNEVENT;
-						else if (event.motion.state & SDL_BUTTON(3))
-							goto LABEL_EYEDROPEVENT;
-					}
-
-					break;
-				case SDL_MOUSEBUTTONDOWN:
-					if (event.button.button == SDL_BUTTON_LEFT)
-						goto LABEL_RETURNEVENT;
-					else if (event.button.button == SDL_BUTTON_RIGHT)
-						goto LABEL_EYEDROPEVENT;
-					break;
-				case SDL_KEYDOWN:
-					if (event.key.keysym.sym == SDLK_ESCAPE)
-					{	
-						done = 1;
-					}
-					if (event.key.keysym.sym == SDLK_LEFT)
-					{	
-						m_posX = (m_posX - 1 + (unsigned int) m_level->width()) % (unsigned int) m_level->width();
-					}
-					if (event.key.keysym.sym == SDLK_RIGHT)
-					{	
-						m_posX = (m_posX + 1) % (unsigned int) m_level->width();
-					}
-					if (event.key.keysym.sym == SDLK_UP)
-					{	
-						m_posY = (m_posY - 1 + (unsigned int) m_level->height()) % (unsigned int) m_level->height();
-					}
-					if (event.key.keysym.sym == SDLK_DOWN)
-					{	
-						m_posY = (m_posY + 1) % (unsigned int) m_level->height();
-					}
-					else if (event.key.keysym.sym == SDLK_RETURN)
-					{
-						; LABEL_RETURNEVENT: ;
-						if (!m_drawRect)
-						{
-							if (m_background)
-								m_level->tiles()[m_posX + m_posY * m_level->width()].bg = m_currentImage;
-							else
-							{
-								m_level->tiles()[m_posX + m_posY * m_level->width()].fg = m_currentImage;
-								m_level->tiles()[m_posX + m_posY * m_level->width()].type = m_currentType;
-							}
-						}
-						else
-						{
-							for (unsigned int rX = m_originX; rX <= m_posX; ++rX)
-								for (unsigned int rY = m_originY; rY <= m_posY; ++rY)
-								{
-									if (m_background)
-										m_level->tiles()[rX + rY * m_level->width()].bg = m_currentImage;
-									else
-									{
-										m_level->tiles()[rX + rY * m_level->width()].fg = m_currentImage;
-										m_level->tiles()[rX + rY * m_level->width()].type = m_currentType;
-									}
-								}
-							m_drawRect = false;
-						}
-					}
-					else if (event.key.keysym.sym == SDLK_f)
-					{
-						if (event.key.keysym.mod == KMOD_LALT
-							|| event.key.keysym.mod == KMOD_RALT)
-						{
-							// fill whole level
-							for (unsigned int rX = 0; rX < m_level->width(); ++rX)
-								for (unsigned int rY = 0; rY < m_level->height(); ++rY)
-								{
-									if (m_background)
-										m_level->tiles()[rX + rY * m_level->width()].bg = m_currentImage;
-									else
-									{
-										m_level->tiles()[rX + rY * m_level->width()].fg = m_currentImage;
-										m_level->tiles()[rX + rY * m_level->width()].type = m_currentType;
-									}
-								}
-						}
-						else if (!m_drawRect)
-						{
-							m_originX = m_posX;
-							m_originY = m_posY;
-							m_drawRect = true;
-						}
-						else
-						{
-							m_drawRect = false;
-						}
-					}
-					else if (event.key.keysym.sym == SDLK_w) // write
-					{
-						m_level->writeToFile(m_filename.c_str());
-						chooseList(0,"Written to '" + m_filename + "'.", NULL, 0);
-						int levelno;
-						sscanf(m_filename.c_str(), PREPATH "level%d.lvl", &levelno);
-						lastEditedLevel = levelno;
-					}
-					else if (event.key.keysym.sym == SDLK_l) // import
-					{
-						importLevel();
-					}
-					else if (event.key.keysym.sym == SDLK_s) // select icon
-					{
-						m_currentImage = chooseTile(m_currentImage);
-					}
-					else if (event.key.keysym.sym == SDLK_b) // background
-					{
-						m_background = !m_background;
-					}
-					else if (event.key.keysym.sym == SDLK_u) // show types
-					{
-						m_showTypes = !m_showTypes;
-					}
-					else if (event.key.keysym.sym == SDLK_t) // select type
-					{
-						// TODO: better message system
-						if (m_background)
-							chooseList(0,"You must be in Foreground Mode!", NULL, 0);
-						else
-							m_currentType = chooseList(m_currentType, "Choose a tile Type:", m_typeList, m_typeListCount);
-					}
-					else if (event.key.keysym.sym == SDLK_e) // eyedrop
-					{
-						; LABEL_EYEDROPEVENT: ;
-						if (m_background)
-							m_currentImage = m_level->getTileBG(m_posX, m_posY);
-						else
-						{
-							m_currentImage = m_level->getTileFG(m_posX, m_posY);
-							m_currentType = m_level->getTileType(m_posX, m_posY);
-						}
-					}
-					else if (event.key.keysym.sym == SDLK_r) // resize
-					{
-						resizeDialog();
-					}
-					else if (event.key.keysym.sym == SDLK_n) // rename
-					{
-						m_level->setName(font->inputText(this, m_level->name(), 12*font->charWidth(), 0, 32));
-					}
-					else if (event.key.keysym.sym == SDLK_i) // change level number
-					{
-						char newfilename[256];
-						int levelno;
-						sscanf(m_filename.c_str(), PREPATH "level%d.lvl", &levelno);
-						sprintf(newfilename, PREPATH "level%d.lvl", font->inputNumber(this, levelno, 0, 0, 3));
-						m_filename = newfilename;
-					}
-					else if (event.key.keysym.sym == SDLK_y)
-					{
-						chooseBackground();
-					}
-					else if (event.key.keysym.sym == SDLK_p)
-					{
-						// Save level first
-						m_level->writeToFile(m_filename.c_str());
-						int levelno;
-						sscanf(m_filename.c_str(), PREPATH "level%d.lvl", &levelno);
-						lastEditedLevel = levelno;
-						
-						// Start a test game
-						OEMFGame * game = new OEMFGame(m_screen, m_execPath, m_screenWidth, m_screenHeight, m_screenBpp);
-						game->setPlayerPosition(m_posX * 32, m_posY * 32);
-						game->run();
-						delete game;
-					}
-					else if (event.key.keysym.sym == SDLK_PAGEUP)
-					{
-						if ((int) m_posY - ((int) m_screenHeight-64) / 32 >= 0)
-						{
-							m_posY = m_posY - (m_screenHeight-64) / 32;
-							m_beginY = m_beginY - (m_screenHeight-64) / 32;
-						}
-					}
-					else if (event.key.keysym.sym == SDLK_PAGEDOWN)
-					{
-						if (m_posY + (m_screenHeight-64) / 32 < m_level->height())
-						{
-							m_posY = m_posY + (m_screenHeight-64) / 32;
-							m_beginY = m_beginY + (m_screenHeight-64) / 32;
-						}
-					}
-					else if (event.key.keysym.sym == SDLK_HOME)
-					{
-						if ((int) m_posX - (int) m_screenWidth / 32 >= 0)
-						{
-							m_posX = m_posX - m_screenWidth / 32;
-							m_beginX = m_beginX - m_screenWidth / 32;
-						}
-					}
-					else if (event.key.keysym.sym == SDLK_END)
-					{
-						if (m_posX + m_screenWidth / 32 < m_level->width())
-						{
-							m_posX = m_posX + m_screenWidth / 32;
-							m_beginX = m_beginX + m_screenWidth / 32;
-						}
-					}
-					break;
-				case SDL_QUIT:
-					exit(0); // TODO
-					done = 1;
-					break;
-				default:
-					break;
-			}
+			this->one_iter();
+			// 30 FPS
+			timepassed = SDL_GetTicks() - timepassed;
+			if (timepassed <= 50)
+				SDL_Delay(50 - timepassed);
 		}
-				
-		// 30 FPS
-		timepassed = SDL_GetTicks() - timepassed;
-		if (timepassed <= 50)
-			SDL_Delay(50 - timepassed);
-	}
+	#endif
 }
 

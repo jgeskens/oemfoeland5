@@ -18,6 +18,10 @@
 #include "OEMFString.h"
 #include "OEMFEnvironment.h"
 
+
+OEMFEnvironment * oemf_env_instance = NULL;
+
+
 OEMFEnvironment :: OEMFEnvironment(SDL_Surface * screen, char * execPath, unsigned int screenWidth, unsigned int screenHeight, unsigned int screenBpp)
 {
 	m_screen = screen;
@@ -29,6 +33,7 @@ OEMFEnvironment :: OEMFEnvironment(SDL_Surface * screen, char * execPath, unsign
 	m_fb = (unsigned int *) screen->pixels;
 	m_pitch = (unsigned int) screen->pitch / 4; // TODO: check this with 8bit and 16bit displays
 }
+
 
 OEMFEnvironment :: ~OEMFEnvironment(void)
 {
@@ -45,6 +50,10 @@ void OEMFEnvironment :: blitImage(OEMFImage * image, unsigned int left, unsigned
 
 void OEMFEnvironment :: blitImage(OEMFImage * image, unsigned int color, unsigned int left, unsigned int top)
 {
+	// This is TOO SLOW for Browsers!!!
+	this->blitImage(image, left, top);
+	return;
+
 	OEMF_LOCKSCREEN;
 	if (SDL_MUSTLOCK(image->getSurface())) SDL_LockSurface(image->getSurface());
 	Uint32 * pixels = (Uint32 *) image->getSurface()->pixels;
@@ -113,17 +122,34 @@ void OEMFEnvironment :: darkenRect(unsigned int left, unsigned int top, unsigned
 
 void OEMFEnvironment :: clearRectWithColor(int left, int top, unsigned int width, unsigned int height, unsigned int color, bool lock)
 {
+	if (lock)
+	{
+		OEMF_LOCKSCREEN;
+	}
 	SDL_Rect rect;
 	rect.x = left;
 	rect.y = top;
 	rect.w = width;
 	rect.h = height;
 	SDL_FillRect(m_screen, &rect, color);
+	if (lock)
+	{
+		OEMF_UNLOCKSCREEN;
+		SDL_UpdateRect(m_screen, left, top, width, height);
+	}
 }
 
 void OEMFEnvironment :: clearWithColor(unsigned int color, bool lock)
 {
+	if (lock)
+	{
+		OEMF_LOCKSCREEN;
+	}
 	SDL_FillRect(m_screen, NULL, color);
+	if (lock)
+	{
+		OEMF_UNLOCKSCREEN;
+	}
 }
 
 void OEMFEnvironment :: fadeOut(void)
@@ -339,3 +365,8 @@ void OEMFEnvironment :: run(void)
 		}
 	}
 }
+
+void OEMFEnvironment :: one_iter(void)
+{
+}
+

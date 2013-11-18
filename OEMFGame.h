@@ -15,7 +15,7 @@
 #include "OEMFStorage.h"
 #include "OEMFGObject.h"
 
-#define KEYCOUNT 1024
+#define KEYCOUNT 65000
 
 using namespace std;
 
@@ -27,6 +27,7 @@ public:
 
 	virtual void run();
 	void setPlayerPosition(int x, int y);
+	virtual void one_iter();
 protected:
 	void refresh();
 	void refreshCentered();
@@ -60,6 +61,10 @@ protected:
 	// physics components
 	void updatePhysics();
 	deque<OEMFGObject *> m_physicsEnabled;
+
+	// state
+	Uint32 start;
+	Sint32 waitTime;
 };
 
 #endif

@@ -15,6 +15,8 @@
 #include "OEMFStorage.h"
 #include "OEMFString.h"
 
+#include "emscripten.h"
+
 OEMFGame :: OEMFGame(SDL_Surface * screen, char * execPath, unsigned int screenWidth, unsigned int screenHeight, unsigned int screenBpp)
 	: OEMFEnvironment(screen, execPath, screenWidth, screenHeight, screenBpp)
 {
@@ -129,23 +131,33 @@ void OEMFGame :: endLevel()
 	darkenRect(160, 128, 320, 80);
 	fonts[FNT_AMIGA]->blitCenterText(this, string("Congratulations!"), 0x007FFF, 128 + 16, m_screenWidth);
 	updateScreen();
+	#ifndef EMSCRIPTEN
 	SDL_Delay(1000);
+	#endif
 	fonts[FNT_AMIGA]->blitCenterText(this, string("You advanced to the next level!"), 0xFF7700, 128 + 32, m_screenWidth);
 	updateScreen();
+	#ifndef EMSCRIPTEN
 	SDL_Delay(1000);
+	#endif
 	fonts[FNT_AMIGA]->blitCenterText(this, string("You get 1000 bonus points!"), 0xFFFF00, 128 + 48, m_screenWidth);
 	updateScreen();
+	#ifndef EMSCRIPTEN
 	SDL_Delay(1000);
+	#endif
 	for (int i = 0; i < 10; ++i)
 	{
 		musicPlayer->playSound(sounds[SND_COIN]);
 		m_score += 100;
 		refreshScoreBoard();
 		updateScreen();
+		#ifndef EMSCRIPTEN
 		SDL_Delay(250);
+		#endif
 	}
 	m_levelNo += 1;
+	#ifndef EMSCRIPTEN
 	SDL_Delay(2000);
+	#endif
 	fadeOut();
 }
 
@@ -166,7 +178,9 @@ void OEMFGame :: die()
 		fonts[FNT_AMIGA]->blitText(this, msg, 0xFF7700, 176, 128 + 16, 320 - 32, false);
 		blitImage(images[IMG_OEMFOEMINI], 160 + 112 + 80, 128 + 16);
 		updateScreen();
+		#ifndef EMSCRIPTEN
 		SDL_Delay(2000);
+		#endif
 		fadeOut();
 	}
 	else
@@ -176,7 +190,9 @@ void OEMFGame :: die()
 		darkenRect(160, 128, 320, 48);
 		fonts[FNT_AMIGA]->blitCenterText(this, string("GAME OVER!"), 0xFF0000, 128 + 16, m_screenWidth, false);
 		updateScreen();
+		#ifndef EMSCRIPTEN
 		SDL_Delay(3000);
+		#endif
 		fadeOut();
 	}
 }
@@ -208,6 +224,9 @@ void OEMFGame :: refreshCentered()
 	// Make sure the player is in the center rectangle of the screen...
 	int playerScreenX = m_player->posX() - m_screenScrollX;
 	int playerScreenY = m_player->posY() - m_screenScrollY;
+
+	//printf("refreshCentered begin\n");
+
 	if (playerScreenX < 160) m_screenScrollX = m_player->posX() - 160;
 	if (playerScreenY < 112) m_screenScrollY = m_player->posY() - 112;
 	if (playerScreenX > 448) m_screenScrollX = m_player->posX() - 448;
@@ -233,6 +252,7 @@ void OEMFGame :: refreshCentered()
 	
 	// background
 	blitImage(images[m_level->background()], 0, 0);
+
 	for (y = beginY; y < height && (y-beginY) < posHeight; y++)
 	{
 		ypos = y * width;
@@ -284,6 +304,7 @@ void OEMFGame :: refreshCentered()
 //	char buffer[1024];
 //	sprintf(buffer, "beginX=%d beginY=%d beginPosX=%d beginPosY=%d", beginX, beginY, beginPosX, beginPosY);
 //	fonts[FNT_AMIGA]->blitCenterText(this, buffer, 32 ,m_screenWidth, false);
+	//printf("refreshCentered end\n");
 }
 
 void OEMFGame :: refresh()
@@ -671,6 +692,111 @@ void OEMFGame :: setPlayerPosition(int x, int y)
 	m_level->moveObject(m_player, x, y);
 }
 
+
+void OEMFGame :: one_iter()
+{
+	SDL_Event event;
+	// if ((waitTime = SDL_GetTicks() - start) >= m_frameDuration) 
+	// {
+	// 	start = SDL_GetTicks();
+	// 	//refresh();
+	// 	refreshCentered();
+	// 	refreshScoreBoard();
+	// 	updateScreen();
+	// }
+
+	refreshCentered();
+	refreshScoreBoard();
+	updateScreen();
+	handleInput();
+	updatePhysics();
+	
+	// handle flags
+	if (m_requestFlagDie)
+	{
+		m_requestFlagDie = false;
+		die();
+	}
+	if (m_requestFlagEnd)
+	{
+		m_requestFlagEnd = false;
+		endLevel();
+		initialize();
+	}
+	
+	Uint32 sym;
+	/* Check for events */
+	while (SDL_PollEvent(&event)) 
+	{
+		switch (event.type) 
+		{
+			case SDL_MOUSEMOTION:
+				break;
+			case SDL_MOUSEBUTTONDOWN:
+				break;
+			case SDL_KEYDOWN:
+				if (event.key.keysym.sym == SDLK_ESCAPE)
+				{	
+					string options[2] = {string("No"), string("Yes")};
+					if (chooseList(0, "Are you sure you want to end the game?", options, 2) == 1)
+						m_done = 1;
+				}
+				else if (event.key.keysym.sym == SDLK_q)
+				{
+					m_frameDuration-=10;
+				}
+				else if (event.key.keysym.sym == SDLK_w)
+				{
+					m_frameDuration+=10;
+				}
+				else if (event.key.keysym.sym == SDLK_e)
+				{
+					m_delayTime--;
+					printf("m_delayTime = %d\n", m_delayTime);
+				}
+				else if (event.key.keysym.sym == SDLK_r)
+				{
+					m_delayTime++;
+					printf("m_delayTime = %d\n", m_delayTime);
+				}
+				else if (event.key.keysym.sym == SDLK_p)
+				{
+					SDL_SaveBMP(m_screen, "screenshot.bmp");
+				}
+				else
+				{
+					// key array
+					sym = event.key.keysym.sym;
+					if (sym < KEYCOUNT)
+					{
+						m_keyDown[sym] = true;
+					}
+				}
+				break;
+			case SDL_KEYUP:
+				// key array
+				sym = event.key.keysym.sym;
+				if (sym < KEYCOUNT)
+				{
+					m_keyDown[sym] = false;
+				}
+				break;
+			case SDL_QUIT:
+				m_done = 1;
+				break;
+			default:
+				break;
+		}
+	}
+}
+
+void * oemf_game_instance = NULL;
+
+void exec_one_iter_game(void){
+	OEMFGame * game = (OEMFGame *) oemf_game_instance;
+	game->one_iter();
+};
+
 void OEMFGame :: run()
 {
 	// clearWithColor(0x000000, false);
@@ -678,111 +804,29 @@ void OEMFGame :: run()
 	refreshCentered();
 	refreshScoreBoard();
 	updateScreen();
+
 	
-	Uint32 start = SDL_GetTicks();
-	Sint32 waitTime = 0;
+	start = SDL_GetTicks();
+	waitTime = 0;
 	
-	SDL_Event event;
-	while (!m_done) 
-	{
-		if ((waitTime = SDL_GetTicks() - start) >= m_frameDuration) 
+	#ifdef EMSCRIPTEN
+		oemf_env_instance = this;
+	#else
+		while (!m_done) 
 		{
-			start = SDL_GetTicks();
-			//refresh();
-			refreshCentered();
-			refreshScoreBoard();
-			updateScreen();
-		}
-		handleInput();
-		updatePhysics();
+			this->one_iter();
 		
-		// handle flags
-		if (m_requestFlagDie)
-		{
-			m_requestFlagDie = false;
-			die();
+	//		Uint32 start2 = SDL_GetTicks();
+	//		while (SDL_GetTicks() - start2 < m_delayTime);
+			
+			SDL_Delay(m_delayTime);
+			
+	//		frameDuration = SDL_GetTicks() - start;
+	//		waitTime = 20 - (Sint32) frameDuration;
+	//		if (waitTime > 0)
+	//			SDL_Delay(waitTime);
 		}
-		if (m_requestFlagEnd)
-		{
-			m_requestFlagEnd = false;
-			endLevel();
-			initialize();
-		}
-		
-		Uint32 sym;
-		/* Check for events */
-		while (SDL_PollEvent(&event)) 
-		{
-			switch (event.type) 
-			{
-				case SDL_MOUSEMOTION:
-					break;
-				case SDL_MOUSEBUTTONDOWN:
-					break;
-				case SDL_KEYDOWN:
-					if (event.key.keysym.sym == SDLK_ESCAPE)
-					{	
-						string options[2] = {string("No"), string("Yes")};
-						if (chooseList(0, "Are you sure you want to end the game?", options, 2) == 1)
-							m_done = 1;
-					}
-					else if (event.key.keysym.sym == SDLK_q)
-					{
-						m_frameDuration-=10;
-					}
-					else if (event.key.keysym.sym == SDLK_w)
-					{
-						m_frameDuration+=10;
-					}
-					else if (event.key.keysym.sym == SDLK_e)
-					{
-						m_delayTime--;
-						printf("m_delayTime = %d\n", m_delayTime);
-					}
-					else if (event.key.keysym.sym == SDLK_r)
-					{
-						m_delayTime++;
-						printf("m_delayTime = %d\n", m_delayTime);
-					}
-					else if (event.key.keysym.sym == SDLK_p)
-					{
-						SDL_SaveBMP(m_screen, "screenshot.bmp");
-					}
-					else
-					{
-						// key array
-						sym = event.key.keysym.sym;
-						if (sym < KEYCOUNT)
-						{
-							m_keyDown[sym] = true;
-						}
-					}
-					break;
-				case SDL_KEYUP:
-					// key array
-					sym = event.key.keysym.sym;
-					if (sym < KEYCOUNT)
-					{
-						m_keyDown[sym] = false;
-					}
-					break;
-				case SDL_QUIT:
-					m_done = 1;
-					break;
-				default:
-					break;
-			}
-		}
-//		Uint32 start2 = SDL_GetTicks();
-//		while (SDL_GetTicks() - start2 < m_delayTime);
-		
-		SDL_Delay(m_delayTime);
-		
-//		frameDuration = SDL_GetTicks() - start;
-//		waitTime = 20 - (Sint32) frameDuration;
-//		if (waitTime > 0)
-//			SDL_Delay(waitTime);
-	}
+	#endif
 }
 
 

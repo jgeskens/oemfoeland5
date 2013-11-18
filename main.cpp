@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 
 	/* Initialize the SDL library */
 	if ( SDL_Init(initflags) < 0 ) {
-		fprintf(stderr, "Couldn't initialize SDL: %s\n",
+		printf("Couldn't initialize SDL: %s\n",
 			SDL_GetError());
 		exit(1);
 	}
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 	screen = SDL_SetVideoMode(640, 480, video_bpp, videoflags);
 	if (screen == NULL)
 	{
-		fprintf(stderr, "Couldn't set 640x480x%d video mode: %s\n",
+		printf("Couldn't set 640x480x%d video mode: %s\n",
                         video_bpp, SDL_GetError());
 		SDL_Quit();
 		exit(2);
@@ -62,12 +62,17 @@ int main(int argc, char *argv[])
 	
 	OEMFEnvironment * mainmenu = new OEMFMain(screen, argv[0], 640, 480, 32);
 	mainmenu->run();
+
+	printf("After mainmenu, ready to return 0 in main()\n");
+
+	return 0;
+
 	delete mainmenu;
-	
+
 	releaseDataMemory(); // loaded by OEMFIntro !!!
 	delete musicPlayer;
 	
 	/* Clean up the SDL library */
 	SDL_Quit();
-	return(0);
+	return 0;
 }

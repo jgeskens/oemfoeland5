@@ -20,7 +20,12 @@
 vector<OEMFImage *> images;
 vector<unsigned int> le_tiles;
 vector<OEMFFontFactory *> fonts;
+#ifndef WINCE
 vector<Mix_Chunk *> sounds;
+#else
+vector<int *> sounds;
+#endif
+
 MusicPlayer * musicPlayer;
 
 int lastEditedLevel = 1;
@@ -43,7 +48,7 @@ void loadFilesIntoDataMemory(const char * defFile)
 	FILE * def = fopen(defFile, "rb");
 	if (def == 0)
 	{
-		fprintf(stderr, "FATAL ERROR: Resource definitions file '%s' not found.\n", defFile);
+		printf("FATAL ERROR: Resource definitions file '%s' not found.\n", defFile);
 		exit(1);
 	}
 	
@@ -111,8 +116,12 @@ void loadFilesIntoDataMemory(const char * defFile)
 		else if (strncmp(buffer, "sound ", 6) == 0)
 		{
 			sscanf(buffer, "%s %s\n", resType, fileName);
+#ifndef WINCE			
 			Mix_Chunk * sound = Mix_LoadWAV((char *) (string(PREPATH) + fileName).c_str());
 			sounds.push_back(sound);
+#else
+			sounds.push_back(0);
+#endif
 			DPRINTF("sounds[%d]=%s\n", (int) sounds.size()-1, fileName);
 		}
 		currentLine += 1;
@@ -129,6 +138,7 @@ void loadFilesIntoDataMemory(const char * defFile)
 		animIt->second[1]->next = animIt->second[0];
 		DPRINTF("%d: %p->%p\n", animIt->first, animIt->second[1], animIt->second[0]);
 	}
+	printf("Survived loadFiles...\n");
 }
 
 void animateImages()
