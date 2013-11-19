@@ -18,8 +18,9 @@
 #include "OEMFString.h"
 #include "OEMFEnvironment.h"
 
+#include "EventLoopStack.h"
 
-OEMFEnvironment * oemf_env_instance = NULL;
+stack<OEMFEnvironment *> oemf_env_instance;
 
 
 OEMFEnvironment :: OEMFEnvironment(SDL_Surface * screen, char * execPath, unsigned int screenWidth, unsigned int screenHeight, unsigned int screenBpp)
@@ -226,31 +227,56 @@ void OEMFEnvironment :: ripEffect(unsigned int top, unsigned int height)
 	}
 }
 
-unsigned int OEMFEnvironment :: chooseList(unsigned int index, string title, string * items, unsigned int itemCount)
-{
-	SDL_Surface * backgroundSrf = SDL_CreateRGBSurface(SDL_SWSURFACE, m_screen->w, m_screen->h, 
-		m_screen->format->BitsPerPixel,
-		m_screen->format->Rmask,
-		m_screen->format->Gmask,
-		m_screen->format->Bmask,
-		m_screen->format->Amask);
-	SDL_BlitSurface(m_screen, NULL, backgroundSrf, NULL);
-	
-	OEMFFontFactory * font = fonts[FNT_AMIGA];
-	unsigned int newIndex = index;
-	if (newIndex >= itemCount)
-		newIndex = 0;
-	
-	unsigned int offset = 0;
-	
-	SDL_Event event;
-	int done = 0;
-	while (!done)
+struct chooseListHandle * chooseListHandleInstance = NULL;
+
+struct chooseListHandle {
+	unsigned int index;
+	string title;
+	string * items;
+	unsigned int itemCount;
+	unsigned int newIndex;
+	unsigned int offset;
+	void (* callback)(int);
+	SDL_Surface * backgroundSrf;
+
+	chooseListHandle(unsigned int index, string title, string * items, unsigned int itemCount, void (* callback)(int))
 	{
-		SDL_Delay(50);
-		SDL_BlitSurface(backgroundSrf, NULL, m_screen, NULL);
-		darkenRect(160, 128, 320, 64 + 16 * (itemCount <= 10 ? itemCount + 1 : 11), false);
-		font->blitCenterText(this, title.c_str(), 0x007FFF, 128 + 16, m_screenWidth, false);
+		OEMFEnvironment * self = oemf_env_instance.top();
+		
+		this->index = index;
+		this->title = title;
+		this->items = items;
+		this->itemCount = itemCount;
+		this->callback = callback;
+
+		backgroundSrf = SDL_CreateRGBSurface(SDL_SWSURFACE, self->m_screen->w, self->m_screen->h, 
+		self->m_screen->format->BitsPerPixel,
+		self->m_screen->format->Rmask,
+		self->m_screen->format->Gmask,
+		self->m_screen->format->Bmask,
+		self->m_screen->format->Amask);
+		SDL_BlitSurface(self->m_screen, NULL, backgroundSrf, NULL);
+		
+		newIndex = index;
+		if (newIndex >= itemCount)
+			newIndex = 0;
+
+		offset = 0;
+		
+		EVENT_LOOP_STACK.push(loop);
+	}
+
+	void one_iter(void)
+	{
+		OEMFEnvironment * self = oemf_env_instance.top();
+		OEMFFontFactory * font = fonts[FNT_AMIGA];
+
+		SDL_Event event;
+
+		SDL_BlitSurface(backgroundSrf, NULL, self->m_screen, NULL);
+		//self->darkenRect(160, 128, 320, 64 + 16 * (itemCount <= 10 ? itemCount + 1 : 11), false);
+		self->clearRectWithColor(160, 128, 320, 64 + 16 * (itemCount <= 10 ? itemCount + 1 : 11), 0x77000000, false);
+		font->blitCenterText(self, title.c_str(), 0x007FFF, 128 + 16, self->m_screenWidth, false);
 		
 		while (newIndex >= offset + 10)
 			offset += 10;
@@ -259,18 +285,18 @@ unsigned int OEMFEnvironment :: chooseList(unsigned int index, string title, str
 		for (unsigned int i = offset; i < itemCount && i - offset < 10; i++)
 		{
 			if (offset + 10 < itemCount)
-				font->blitText(this, string("vvv Next Page vvv"), 0xFF7700, 184, 128 + 48 + 16 * 10, m_screenWidth, false);
+				font->blitText(self, string("vvv Next Page vvv"), 0xFF7700, 184, 128 + 48 + 16 * 10, self->m_screenWidth, false);
 			if (offset > 0)
-				font->blitText(this, string("^^^ Previous Page ^^^"), 0xFF7700, 184, 128 + 32, m_screenWidth, false);
+				font->blitText(self, string("^^^ Previous Page ^^^"), 0xFF7700, 184, 128 + 32, self->m_screenWidth, false);
 			if (i == newIndex)
 			{	
-				font->blitText(this, (string("> ") + items[i]).c_str(), 0xFFFF00, 168, 128 + 48 + 16 * (i%10), m_screenWidth, false);
+				font->blitText(self, (string("> ") + items[i]).c_str(), 0xFFFF00, 168, 128 + 48 + 16 * (i%10), self->m_screenWidth, false);
 			}
 			else
-				font->blitText(this, items[i].c_str(), 0xFFFFFF, 184, 128 + 48 + 16 * (i%10), m_screenWidth, false);
+				font->blitText(self, items[i].c_str(), 0xFFFFFF, 184, 128 + 48 + 16 * (i%10), self->m_screenWidth, false);
 		}
 		
-		SDL_UpdateRect(m_screen, 160, 128, 320, 64 + 16 * itemCount);
+		SDL_UpdateRect(self->m_screen, 160, 128, 320, 64 + 16 * itemCount);
 		while (SDL_PollEvent(&event))
 		{
 			if (event.type == SDL_KEYDOWN)
@@ -295,19 +321,37 @@ unsigned int OEMFEnvironment :: chooseList(unsigned int index, string title, str
 				}
 				else if (event.key.keysym.sym == SDLK_RETURN)
 				{
-					done = 1;
+					end();
+					if (callback != NULL)
+						callback(newIndex);
 				}
 				else if (event.key.keysym.sym == SDLK_ESCAPE)
 				{
-					newIndex = index;
-					done = 1;
+					end();
 				}
 			}
 		}
-	}
-	
-	SDL_FreeSurface(backgroundSrf);
-	return newIndex;
+	};
+
+	void end(void)
+	{
+		EVENT_LOOP_STACK.pop();
+		SDL_FreeSurface(backgroundSrf);
+		delete this;
+	};
+
+	static void loop(void)
+	{
+		if (chooseListHandleInstance != NULL)
+			chooseListHandleInstance->one_iter();
+	};
+};
+
+
+unsigned int OEMFEnvironment :: chooseList(unsigned int index, string title, string * items, unsigned int itemCount, void (* callback)(int))
+{
+	chooseListHandleInstance = new struct chooseListHandle(index, title, items, itemCount, callback);
+	return 0;
 }
 
 void OEMFEnvironment :: waitForKey()

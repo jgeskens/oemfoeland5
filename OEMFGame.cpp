@@ -194,6 +194,8 @@ void OEMFGame :: die()
 		SDL_Delay(3000);
 		#endif
 		fadeOut();
+		oemf_env_instance.pop();
+		delete this;
 	}
 }
 
@@ -399,11 +401,8 @@ void OEMFGame :: refreshScoreBoard()
 	sprintf(stats, "              Lives:    x%2d", m_lives);
 	fonts[FNT_AMIGA]->blitText(this, stats, 0xFF7700, 12, m_screenHeight-24, m_screenWidth-12, false);
 	
-#ifdef __DEBUG__
-	sprintf(stats, "                            Level: %3d       (Scroll %d:%d)", m_levelNo, m_screenScrollX, m_screenScrollY);
-#else
 	sprintf(stats, "                            Level: %3d                          ", m_levelNo);
-#endif
+
 	fonts[FNT_AMIGA]->blitText(this, stats, 0x3399FF, 12, m_screenHeight-24, m_screenWidth-12, false);
 
 	blitImage(images[IMG_OEMFOEMINI], 180, m_screenHeight - 24);
@@ -693,6 +692,16 @@ void OEMFGame :: setPlayerPosition(int x, int y)
 }
 
 
+void endGameDialogCB(int result)
+{
+	OEMFGame * game = (OEMFGame *) oemf_env_instance.top();
+	if (result == 1)
+	{
+		oemf_env_instance.pop();
+		delete game;
+	}
+}
+
 void OEMFGame :: one_iter()
 {
 	SDL_Event event;
@@ -737,9 +746,8 @@ void OEMFGame :: one_iter()
 			case SDL_KEYDOWN:
 				if (event.key.keysym.sym == SDLK_ESCAPE)
 				{	
-					string options[2] = {string("No"), string("Yes")};
-					if (chooseList(0, "Are you sure you want to end the game?", options, 2) == 1)
-						m_done = 1;
+					static string options[2] = {"No", "Yes"};
+					chooseList(0, "Are you sure you want to end the game?", options, 2, endGameDialogCB);
 				}
 				else if (event.key.keysym.sym == SDLK_q)
 				{
@@ -810,7 +818,7 @@ void OEMFGame :: run()
 	waitTime = 0;
 	
 	#ifdef EMSCRIPTEN
-		oemf_env_instance = this;
+		oemf_env_instance.push(this);
 	#else
 		while (!m_done) 
 		{

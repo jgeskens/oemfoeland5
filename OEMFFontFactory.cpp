@@ -20,6 +20,8 @@
 #include "OEMFImage.h"
 #include "OEMFEnvironment.h"
 
+#include "EventLoopStack.h"
+
 OEMFFontFactory :: OEMFFontFactory(OEMFImage * fontImage, unsigned int rangeFrom, unsigned int rangeTo, unsigned int charWidth, unsigned int charHeight, unsigned int charsPerRow)
 {
 	m_rangeFrom = rangeFrom;
@@ -130,45 +132,86 @@ void OEMFFontFactory :: blitCenterText(OEMFEnvironment * env, string text, unsig
 	blitText(env, text, color, textLeft, top, screenWidth - textLeft, lock);
 }
 
-int OEMFFontFactory :: inputNumber(OEMFEnvironment * env, int def, unsigned int left, unsigned int top, unsigned int maxlen)
-{
-	char * defcstr = (char *) malloc(maxlen+32);
-	
-	sprintf(defcstr, "%d", def);
-	string defstr = defcstr;
-	string newstr = inputText(env, defstr, left, top, maxlen);
+void (* inputNumberIntCB)(int);
+void inputNumberCB(string newstr){
 	int newint;
 	sscanf(newstr.c_str(), "%d", &newint);
-	return newint;
+	inputNumberIntCB(newint);
 }
 
-string OEMFFontFactory :: inputText(OEMFEnvironment * env, string def, unsigned int left, unsigned int top, unsigned int maxlen)
+void OEMFFontFactory :: inputNumber(OEMFEnvironment * env, int def, unsigned int left, unsigned int top, unsigned int maxlen, void (* callback)(int))
 {
-	bool done = false;
-	unsigned int cursor = def.length();
-	string newstring = def;
-	m_screen = env->Screen();
-	SDL_Event event;
-	SDL_EnableUNICODE(1);
-	while (!done)
+	char * defcstr = (char *) malloc(maxlen+32);
+	sprintf(defcstr, "%d", def);
+	string defstr = defcstr;
+	inputNumberIntCB = callback;
+	inputText(env, defstr, left, top, maxlen, inputNumberCB);
+}
+
+
+struct inputTextHandle * inputTextHandleInstance = NULL;
+struct inputTextHandle
+{
+	OEMFFontFactory * font;
+	OEMFEnvironment * env;
+	string def;
+	unsigned int left;
+	unsigned int top;
+	unsigned int maxlen;
+	void (* callback)(string);
+
+	unsigned int cursor;
+	string newstring;
+
+	inputTextHandle(OEMFFontFactory * font, OEMFEnvironment * env, string def, unsigned int left, unsigned int top, unsigned int maxlen, void (* callback)(string))
 	{
+		this->font = font;
+		this->env = env;
+		this->def = def;
+		this->left = left;
+		this->top = top;
+		this->maxlen = maxlen;
+		this->callback = callback;
+
+		cursor = def.length();
+		newstring = def;
+		font->m_screen = env->Screen();
+		SDL_EnableUNICODE(1);
+
+		inputTextHandleInstance = this;
+		EVENT_LOOP_STACK.push(loop);
+	};
+
+	void end(void)
+	{
+		SDL_EnableUNICODE(0);
+		EVENT_LOOP_STACK.pop();
+		inputTextHandleInstance = NULL;
+		delete this;
+	};
+
+	void one_iter(void)
+	{
+		SDL_Event event;
 		// render text input field
-		env->clearRectWithColor(left, top, charWidth() * (maxlen+1), charHeight() + 2, 0xFF000000, false);
-		blitText(env, newstring.c_str(), left, top, (maxlen+1) * charWidth(), false);
-		env->clearRectWithColor(left + charWidth() * cursor, top + charHeight(), charWidth(), 2, 0xFFFFFFFF, false);
-		SDL_UpdateRect(m_screen, left, top, charWidth() * (maxlen+1), charHeight() + 2);
+		env->clearRectWithColor(left, top, font->charWidth() * (maxlen+1), font->charHeight() + 2, 0xFF000000, false);
+		font->blitText(env, newstring.c_str(), left, top, (maxlen+1) * font->charWidth(), false);
+		env->clearRectWithColor(left + font->charWidth() * cursor, top + font->charHeight(), font->charWidth(), 2, 0xFFFFFFFF, false);
+		SDL_UpdateRect(font->m_screen, left, top, font->charWidth() * (maxlen+1), font->charHeight() + 2);
 		while (SDL_PollEvent(&event))
 		{
 			if (event.type == SDL_KEYDOWN)
 			{
 				if (event.key.keysym.sym == SDLK_ESCAPE)
 				{
-					newstring = def;
-					done = true;
+					end();
 				}
 				else if (event.key.keysym.sym == SDLK_RETURN)
 				{
-					done = true;
+					void (* cb)(string) = callback;
+					if (cb)
+						cb(newstring);
+					end();
 				}
 				else if (event.key.keysym.sym == SDLK_LEFT)
 				{
@@ -232,8 +275,17 @@ string OEMFFontFactory :: inputText(OEMFEnvironment * env, string def, unsigned 
 				}
 			}
 		}
-	}
-	SDL_EnableUNICODE(0);
-	return newstring;
+	};
+
+	static void loop(void){
+		if (inputTextHandleInstance != NULL)
+			inputTextHandleInstance->one_iter();
+	};
+};
+
+
+void OEMFFontFactory :: inputText(OEMFEnvironment * env, string def, unsigned int left, unsigned int top, unsigned int maxlen, void (* callback)(string))
+{
+	new struct inputTextHandle(this, env, def, left, top, maxlen, callback);
 }
 

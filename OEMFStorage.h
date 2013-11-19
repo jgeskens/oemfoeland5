@@ -25,7 +25,7 @@ using namespace std;
 #endif
 
 #if defined(__DEBUG__) || defined(_DEBUG)
-#define DPRINTF printf
+#define DPRINTF if (0) printf
 #else
 #define DPRINTF if (0) printf
 #endif

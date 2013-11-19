@@ -14,6 +14,7 @@
 #include "SDL.h"
 
 #include <string>
+#include <stack>
 
 #include "MusicPlayer.h"
 #include "OEMFImage.h"
@@ -44,10 +45,10 @@ public:
 	
 	void updateScreen() { SDL_UpdateRect(m_screen, 0, 0, m_screenWidth, m_screenHeight); };
 	void waitForKey();
-	unsigned int chooseList(unsigned int index, string title, string * items, unsigned int itemCount);
+	unsigned int chooseList(unsigned int index, string title, string * items, unsigned int itemCount, void (* callback)(int));
 	virtual void run(void);
 	virtual void one_iter(void);
-protected:
+
 	unsigned int m_screenWidth;
 	unsigned int m_screenHeight;
 	unsigned char m_screenBpp;
@@ -58,7 +59,7 @@ protected:
 };
 
 extern "C" {
-	extern OEMFEnvironment * oemf_env_instance;
+	extern stack<OEMFEnvironment *> oemf_env_instance;
 };
 
 #endif

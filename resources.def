@@ -53,7 +53,7 @@ image elevator2.png 0 4
 image elevator3.png 0 4
 image elevator4.png 0 4
 # 0
-font font.png 1 32 127 8 16 96
+font font.png 0 32 127 8 16 96
 font menufont.png 0 32 91 32 32 10
 # 0
 sound coin.wav

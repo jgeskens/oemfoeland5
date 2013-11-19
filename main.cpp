@@ -14,8 +14,22 @@
 #include "OEMFImage.h"
 #include "OEMFString.h"
 #include "OEMFStorage.h"
+#include "EventLoopStack.h"
+#include "emscripten.h"
 
 using namespace std;
+
+void main_loop(void)
+{
+	if (!EVENT_LOOP_STACK.empty()){
+		EVENT_LOOP_STACK.top()();
+	}
+}
+
+void exec_env_one_iter(void){
+	if (!oemf_env_instance.empty())
+		oemf_env_instance.top()->one_iter();
+};
 
 int main(int argc, char *argv[])
 {
@@ -59,13 +73,19 @@ int main(int argc, char *argv[])
 	OEMFEnvironment * intro = new OEMFIntro(screen, argv[0], 640, 480, 32);
 	intro->run();
 	delete intro;
-	
+
+	// Hide mouse
+	emscripten_hide_mouse();
+
+	// Set up main loop
+	emscripten_set_main_loop(main_loop, 60, 0);
+	EVENT_LOOP_STACK.push(exec_env_one_iter);
+
+	// Switch to main menu
 	OEMFEnvironment * mainmenu = new OEMFMain(screen, argv[0], 640, 480, 32);
 	mainmenu->run();
-
-	printf("After mainmenu, ready to return 0 in main()\n");
-
 	return 0;
+
 
 	delete mainmenu;
 

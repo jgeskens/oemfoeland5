@@ -50,13 +50,9 @@ void OEMFIntro :: run(void)
 	
 	// loading...
 	setLoadProgressCB(progress, this);
-	printf("Before loadFilesIntoDataMemory\n");
 	loadFilesIntoDataMemory("resources.def");
-	printf("After loadFilesIntoDataMemory\n");
 	clearRectWithColor(0, 216, 640, 16, 0xFF000000, false);
 	updateScreen();
-
-	printf("updateScreen survived\n");
 	
 #ifndef __DEBUG__
 	OEMFFontFactory * ff = fonts[FNT_AMIGA];

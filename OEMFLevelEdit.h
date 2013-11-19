@@ -25,7 +25,7 @@ public:
 	
 	virtual void run(void);
 	virtual void one_iter(void);
-protected:
+
 	void drawInterface(unsigned int left, unsigned int top, unsigned int width, unsigned int height);
 	void chooseBackground();
 	unsigned int chooseTile(unsigned int index);

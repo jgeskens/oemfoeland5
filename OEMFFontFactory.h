@@ -29,14 +29,14 @@ public:
 	void blitCenterText(OEMFEnvironment * env, string text, unsigned int top, unsigned int screenWidth, bool lock = true);
 	void blitCenterText(OEMFEnvironment * env, string text, unsigned int color, unsigned int top, unsigned int screenWidth, bool lock = true);
 	
-	int inputNumber(OEMFEnvironment * env, int def, unsigned int left, unsigned int top, unsigned int maxlen);
-	string inputText(OEMFEnvironment * env, string def, unsigned int left, unsigned int top, unsigned int maxlen);
+	void inputNumber(OEMFEnvironment * env, int def, unsigned int left, unsigned int top, unsigned int maxlen, void (* callback)(int));
+	void inputText(OEMFEnvironment * env, string def, unsigned int left, unsigned int top, unsigned int maxlen, void (* callback)(string));
 
 	unsigned int charWidth(void) const { return m_charWidth; };
 	unsigned int charHeight(void) const { return m_charHeight; };
 	
 	void setShadow(char offset) { m_shadow = offset; };
-protected:
+
 	OEMFImage ** m_chars;
 	SDL_Surface * m_screen;
 	unsigned int m_rangeFrom;

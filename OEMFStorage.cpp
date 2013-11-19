@@ -138,7 +138,6 @@ void loadFilesIntoDataMemory(const char * defFile)
 		animIt->second[1]->next = animIt->second[0];
 		DPRINTF("%d: %p->%p\n", animIt->first, animIt->second[1], animIt->second[0]);
 	}
-	printf("Survived loadFiles...\n");
 }
 
 void animateImages()

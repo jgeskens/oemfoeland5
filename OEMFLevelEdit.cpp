@@ -15,7 +15,9 @@
 #include "OEMFStorage.h"
 #include "OEMFGame.h"
 
- #include "emscripten.h"
+#include "EventLoopStack.h"
+
+#include "emscripten.h"
 
 OEMFLevelEdit :: OEMFLevelEdit(SDL_Surface * screen, char * execPath, unsigned int screenWidth, unsigned int screenHeight, unsigned int screenBpp)
 	: OEMFEnvironment(screen, execPath, screenWidth, screenHeight, screenBpp)
@@ -70,82 +72,95 @@ OEMFLevelEdit :: ~OEMFLevelEdit(void)
 	delete m_level;
 }
 
+void chooseBackgroundCB(int bg)
+{
+	OEMFLevelEdit * le = (OEMFLevelEdit *) oemf_env_instance.top();
+	if (bg == 0)
+		le->m_level->setBackground(IMG_CLOUDS1);
+	else if (bg == 1)
+		le->m_level->setBackground(IMG_CLOUDS2);
+}
+
 void OEMFLevelEdit :: chooseBackground()
 {
 	string * bglist = new string[2];
 	bglist[0] = "Brown/dark clouds";
 	bglist[1] = "Blue clouds";
-	unsigned int bg = chooseList(0, string("Choose a background image:"), bglist, 2);
-	if (bg == 0)
-		m_level->setBackground(IMG_CLOUDS1);
-	else if (bg == 1)
-		m_level->setBackground(IMG_CLOUDS2);
+	chooseList(0, string("Choose a background image:"), bglist, 2, chooseBackgroundCB);
 }
+
+unsigned int chooseTileIndex = 0;
+unsigned int chooseTileListIndex = 0;
+unsigned int chooseTileImageIndex = 0;
+unsigned int chooseTileBeginIndex = 0;
+
+void chooseTileLoop(void)
+{
+	OEMFLevelEdit * self = (OEMFLevelEdit *) oemf_env_instance.top();
+	SDL_Event event;
+
+	// calculate beginindex (for scrolling)
+	while ((int) chooseTileListIndex - (int) chooseTileBeginIndex < 0)
+	{
+		chooseTileBeginIndex--;
+	}
+	while (((int) chooseTileListIndex - (int) chooseTileBeginIndex + 1) * 32 > (int) self->m_screenWidth && chooseTileBeginIndex < self->m_screenWidth / 32)
+	{
+		chooseTileBeginIndex++;
+	}
+	
+	self->clearRectWithColor(0, self->m_screenHeight - 32, self->m_screenWidth, 32, 0xFF000000, false);
+	unsigned int p = 0;
+	for (unsigned int i = chooseTileBeginIndex; i < self->m_imageCount && (p + 1) * 32 <= self->m_screenWidth; i++)
+	{
+		self->blitImage(images[self->m_images[i]], p * 32, self->m_screenHeight - 32);
+		p++;
+	}
+	p = chooseTileListIndex - chooseTileBeginIndex;
+	if (chooseTileListIndex >= chooseTileBeginIndex && (p + 1) * 32 <= self->m_screenWidth)
+		self->blitImage(images[IMG_SELECTION], p * 32, self->m_screenHeight - 32);
+	
+	SDL_UpdateRect(self->m_screen, 0, self->m_screenHeight - 32, self->m_screenWidth, 32);
+	while (SDL_PollEvent(&event))
+	{
+		switch (event.type)
+		{
+			case SDL_KEYDOWN:
+				if (event.key.keysym.sym == SDLK_ESCAPE)
+				{	
+					EVENT_LOOP_STACK.pop();
+				}
+				else if (event.key.keysym.sym == SDLK_LEFT)
+				{
+					chooseTileListIndex = (chooseTileListIndex - 1 + self->m_imageCount) % self->m_imageCount;
+				}
+				else if (event.key.keysym.sym == SDLK_RIGHT)
+				{
+					chooseTileListIndex = (chooseTileListIndex + 1) % self->m_imageCount;
+				}
+				else if (event.key.keysym.sym == SDLK_RETURN)
+				{
+					chooseTileImageIndex = self->m_images[chooseTileListIndex];
+					self->m_currentImage = chooseTileImageIndex;
+					EVENT_LOOP_STACK.pop();
+				}
+			break;
+		}
+	}
+}
+
 
 unsigned int OEMFLevelEdit :: chooseTile(unsigned int index)
 {
-	unsigned int listIndex = 0;
-	unsigned int imageIndex = 0;
-	unsigned int beginIndex = 0;
 	// select right index
 	for (unsigned int i = 0; i < m_imageCount; i++)
 		if (m_images[i] == index)
-			listIndex = i;
+			chooseTileListIndex = i;
 	
-	int done = 0;
-	SDL_Event event;
-	while (!done)
-	{
-		// calculate beginindex (for scrolling)
-		while ((int) listIndex - (int) beginIndex < 0)
-		{
-			beginIndex--;
-		}
-		while (((int) listIndex - (int) beginIndex + 1) * 32 > (int) m_screenWidth && beginIndex < m_screenWidth / 32)
-		{
-			beginIndex++;
-		}
-		
-		clearRectWithColor(0, m_screenHeight - 32, m_screenWidth, 32, 0x000000, false);
-		unsigned int p = 0;
-		for (unsigned int i = beginIndex; i < m_imageCount && (p + 1) * 32 <= m_screenWidth; i++)
-		{
-			blitImage(images[m_images[i]], p * 32, m_screenHeight - 32);
-			p++;
-		}
-		p = listIndex - beginIndex;
-		if (listIndex >= beginIndex && (p + 1) * 32 <= m_screenWidth)
-			blitImage(images[IMG_SELECTION], p * 32, m_screenHeight - 32);
-		
-		SDL_UpdateRect(m_screen, 0, m_screenHeight - 32, m_screenWidth, 32);
-		while (SDL_PollEvent(&event))
-		{
-			switch (event.type)
-			{
-				case SDL_KEYDOWN:
-					if (event.key.keysym.sym == SDLK_ESCAPE)
-					{	
-						imageIndex = index;
-						done = 1;
-					}
-					else if (event.key.keysym.sym == SDLK_LEFT)
-					{
-						listIndex = (listIndex - 1 + m_imageCount) % m_imageCount;
-					}
-					else if (event.key.keysym.sym == SDLK_RIGHT)
-					{
-						listIndex = (listIndex + 1) % m_imageCount;
-					}
-					else if (event.key.keysym.sym == SDLK_RETURN)
-					{
-						imageIndex = m_images[listIndex];
-						done = 1;
-					}
-				break;
-			}
-		}
-	}
-	return imageIndex;
+	chooseTileIndex = index;
+	EVENT_LOOP_STACK.push(chooseTileLoop);
+	EVENT_LOOP_STACK_LAST = chooseTileLoop;
+	return 0;
 }
 
 void OEMFLevelEdit :: drawInterface(unsigned int left, unsigned int top, unsigned int width, unsigned int height)
@@ -173,7 +188,7 @@ void OEMFLevelEdit :: drawInterface(unsigned int left, unsigned int top, unsigne
 	}
 	
 	// clear screen
-	clearWithColor(0x000000, false);
+	clearWithColor(0xFF000000, false);
 	
 	// top bar
 	font->blitText(this, ("Level Edit '" + m_level->name() + "' Change: [N]ame [I]ndex [R]esize"), 0xFFFF00, 0, 0, 640, false);
@@ -267,6 +282,32 @@ void OEMFLevelEdit :: drawInterface(unsigned int left, unsigned int top, unsigne
 	animateImages();
 }
 
+
+unsigned int resizeNewWidth;
+
+void resizeCB2(int newheight)
+{
+	OEMFLevelEdit * le = (OEMFLevelEdit *) oemf_env_instance.top();
+	le->m_level->resize(resizeNewWidth, newheight);
+}
+
+
+void resizeCB1(int newwidth)
+{
+	OEMFLevelEdit * le = (OEMFLevelEdit *) oemf_env_instance.top();
+
+	resizeNewWidth = newwidth;
+
+	OEMFFontFactory * font = fonts[FNT_AMIGA];
+	unsigned int newheight = le->m_level->height();
+	char originalpos[32];
+	sprintf(originalpos, "%d\n%d", newwidth, newheight);
+
+	font->blitText(le, originalpos, 0xFFFFFFFF, 160+16+12*font->charWidth(), 128+16+32, 12*font->charWidth(), true);
+	font->inputNumber(le, newheight, 160+16+12*font->charWidth(), 128+16+48, 3, resizeCB2);
+}
+
+
 void OEMFLevelEdit :: resizeDialog(void)
 {
 	OEMFFontFactory * font = fonts[FNT_AMIGA];
@@ -275,20 +316,28 @@ void OEMFLevelEdit :: resizeDialog(void)
 	char originalpos[32];
 	sprintf(originalpos, "%d\n%d", newwidth, newheight);
 
-	darkenRect(160, 128, 320, 96, true);
+	//darkenRect(160, 128, 320, 96, true);
+	clearRectWithColor(160, 128, 320, 96, 0x77000000, false);
 	font->blitCenterText(this, "Resize Level", 0x007FFF, 128+16, m_screenWidth, false);
 	font->blitText(this, "New width:", 0xFFFF00, 160+16, 128+16+32, 12*font->charWidth(), false);
 	font->blitText(this, "New height:", 0xFFFF00, 160+16, 128+16+48, 12*font->charWidth(), false);
 	font->blitText(this, originalpos, 0xFFFFFF, 160+16+12*font->charWidth(), 128+16+32, 12*font->charWidth(), false);
 
 	SDL_UpdateRect(m_screen, 160, 128, 320, 96);
-	newwidth = (unsigned int) font->inputNumber(this, newwidth, 160+16+12*font->charWidth(), 128+16+32, 3);
-	sprintf(originalpos, "%d\n%d", newwidth, newheight);
-	font->blitText(this, originalpos, 0xFFFFFF, 160+16+12*font->charWidth(), 128+16+32, 12*font->charWidth(), true);
-	newheight = (unsigned int) font->inputNumber(this, newheight, 160+16+12*font->charWidth(), 128+16+48, 3);
-	// actual resize
-	m_level->resize(newwidth, newheight);
+	font->inputNumber(this, newwidth, 160+16+12*font->charWidth(), 128+16+32, 3, resizeCB1);
 }
+
+
+void importLevelCB(int result)
+{
+	OEMFLevelEdit * le = (OEMFLevelEdit *) oemf_env_instance.top();
+	char buffer[1024];
+	sprintf(buffer, PREPATH "level%d.lvl", result+1);
+	le->m_filename = buffer;
+	delete le->m_level;
+	le->m_level = new OEMFLevel((char *) le->m_filename.c_str());
+}
+
 
 void OEMFLevelEdit :: importLevel()
 {
@@ -314,16 +363,32 @@ void OEMFLevelEdit :: importLevel()
 	
 	int levelno;
 	sscanf(m_filename.c_str(), PREPATH "level%d.lvl", &levelno);
-	int result = chooseList(levelno-1, "Load Level", fileList, levelNum);
-	if (result != levelNum)
-	{
-		sprintf(buffer, PREPATH "level%d.lvl", result+1);
-		m_filename = buffer;
-		delete m_level;
-		m_level = new OEMFLevel((char *) m_filename.c_str());
-	}
-	delete [] fileList;
+	chooseList(levelno-1, "Load Level", fileList, levelNum, importLevelCB);
 }
+
+
+void chooseTypeCB(int result)
+{
+	OEMFLevelEdit * le = (OEMFLevelEdit *) oemf_env_instance.top();
+	le->m_currentType = result;
+}
+
+
+void setNameCB(string name)
+{
+	OEMFLevelEdit * le = (OEMFLevelEdit *) oemf_env_instance.top();
+	le->m_level->setName(name);
+}
+
+
+void changeLevelCB(int level)
+{
+	char newfilename[256];
+	OEMFLevelEdit * le = (OEMFLevelEdit *) oemf_env_instance.top();
+	sprintf(newfilename, PREPATH "level%d.lvl", level);
+	le->m_filename = newfilename;
+}
+
 
 void OEMFLevelEdit :: one_iter(void)
 {
@@ -364,6 +429,7 @@ void OEMFLevelEdit :: one_iter(void)
 				if (event.key.keysym.sym == SDLK_ESCAPE)
 				{	
 					done = 1;
+					oemf_env_instance.pop();
 				}
 				if (event.key.keysym.sym == SDLK_LEFT)
 				{	
@@ -442,10 +508,11 @@ void OEMFLevelEdit :: one_iter(void)
 				else if (event.key.keysym.sym == SDLK_w) // write
 				{
 					m_level->writeToFile(m_filename.c_str());
-					chooseList(0,"Written to '" + m_filename + "'.", NULL, 0);
 					int levelno;
 					sscanf(m_filename.c_str(), PREPATH "level%d.lvl", &levelno);
 					lastEditedLevel = levelno;
+
+					chooseList(0,"Written to '" + m_filename + "'.", NULL, 0, NULL);
 				}
 				else if (event.key.keysym.sym == SDLK_l) // import
 				{
@@ -453,7 +520,7 @@ void OEMFLevelEdit :: one_iter(void)
 				}
 				else if (event.key.keysym.sym == SDLK_s) // select icon
 				{
-					m_currentImage = chooseTile(m_currentImage);
+					chooseTile(m_currentImage);
 				}
 				else if (event.key.keysym.sym == SDLK_b) // background
 				{
@@ -467,9 +534,9 @@ void OEMFLevelEdit :: one_iter(void)
 				{
 					// TODO: better message system
 					if (m_background)
-						chooseList(0,"You must be in Foreground Mode!", NULL, 0);
+						chooseList(0,"You must be in Foreground Mode!", NULL, 0, NULL);
 					else
-						m_currentType = chooseList(m_currentType, "Choose a tile Type:", m_typeList, m_typeListCount);
+						chooseList(m_currentType, "Choose a tile Type:", m_typeList, m_typeListCount, chooseTypeCB);
 				}
 				else if (event.key.keysym.sym == SDLK_e) // eyedrop
 				{
@@ -488,15 +555,14 @@ void OEMFLevelEdit :: one_iter(void)
 				}
 				else if (event.key.keysym.sym == SDLK_n) // rename
 				{
-					m_level->setName(font->inputText(this, m_level->name(), 12*font->charWidth(), 0, 32));
+					font->inputText(this, m_level->name(), 12*font->charWidth(), 0, 32, setNameCB);
 				}
 				else if (event.key.keysym.sym == SDLK_i) // change level number
 				{
 					char newfilename[256];
 					int levelno;
 					sscanf(m_filename.c_str(), PREPATH "level%d.lvl", &levelno);
-					sprintf(newfilename, PREPATH "level%d.lvl", font->inputNumber(this, levelno, 0, 0, 3));
-					m_filename = newfilename;
+					font->inputNumber(this, levelno, 0, 0, 3, changeLevelCB);
 				}
 				else if (event.key.keysym.sym == SDLK_y)
 				{
@@ -514,7 +580,6 @@ void OEMFLevelEdit :: one_iter(void)
 					OEMFGame * game = new OEMFGame(m_screen, m_execPath, m_screenWidth, m_screenHeight, m_screenBpp);
 					game->setPlayerPosition(m_posX * 32, m_posY * 32);
 					game->run();
-					delete game;
 				}
 				else if (event.key.keysym.sym == SDLK_PAGEUP)
 				{
@@ -567,7 +632,7 @@ void OEMFLevelEdit :: run(void)
 	SDL_WarpMouse(16, 48);
 	
 	#ifdef EMSCRIPTEN
-		oemf_env_instance = this;
+		oemf_env_instance.push(this);
 	#else
 		while (!done) 
 		{
